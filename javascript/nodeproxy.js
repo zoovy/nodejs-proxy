@@ -13,7 +13,7 @@
 //		* node is a server side javascript engine based on chromes v8 javascript engine.
 //		* node can be downloaded from http://www.nodejs.org
 // 1b. in a dos cmd window:
-//		# npm install http-proxy colors mime
+//		# npm install http-proxy colors mime optimist
 // 1c. open dos/cmd window, then change directory to where the proxy is installed then run:
 //		# node nodeproxy.js
 // 1d. open firefox, chrome, ie, etc. on your machine go to the proxy settings and put in 127.0.0.1:8081 and select 'proxy all protocols'
@@ -61,12 +61,20 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 3a. change any of these variables to match your project:
-var TESTING_DOMAIN = "www.zoovy.com";
-var PROJECT_DIRECTORY = process.cwd() + "/../..";		// the root directory where your project files are located
+var TESTING_DOMAIN = "www.zoovy.com";					// --domain
+var PROJECT_DIRECTORY = process.cwd() + "/../..";		// --rootdir      the root directory where your project files are located
+var ROOT_KEY_FILEPATH = "FakeRoot.key";					// --key the C;\path\to\file
+var CERTIFICATE_FILEPATH = TESTING_DOMAIN+'.crt';		// --cert  normally stored in www.domain.com.crt
 
 // 3b. run: node nodeproxy.js
 // 3c. (as instructed) - configure your browser's proxy port
+//		pass --dir
+var argv = require('optimist').argv;
 
+if (argv.rootdir) { PROJECT_DIRECTORY = argv.rootdir; }
+if (argv.domain) {	TESTING_DOMAIN = argv.domain; }
+if (argv.key) {	ROOT_KEY_FILEPATH = argv.key; }
+if (argv.cert) { CERTIFICATE_FILEPATH = argv.cert; }
 
  
 // these are all modules you may need to install 
@@ -100,8 +108,8 @@ console.log("FILES SERVED FROM=> "+PROJECT_DIRECTORY);
   
  var WEBSERVERoptions = {
   https: {
-    key: fs.readFileSync('test.key', 'utf8'),
-    cert: fs.readFileSync(TESTING_DOMAIN+'.crt', 'utf8')
+    key: fs.readFileSync(ROOT_KEY_FILEPATH, 'utf8'),
+    cert: fs.readFileSync(CERTIFICATE_FILEPATH, 'utf8')
   }
 };
 

@@ -10,14 +10,201 @@ using OpenSSL.X509;
 using OpenSSL.Crypto;
 using OpenSSL.Core;
 using System.IO;
+using System.Diagnostics;
+using System.Threading;
 
 namespace NodeProxy
 {
     public partial class Form1 : Form
     {
+        static System.Diagnostics.Process CMDprocess;
+        static System.Diagnostics.ProcessStartInfo startInfo;
+        private static bool processDone = false;
+
+
         public Form1()
         {
             InitializeComponent();
+            Load += new EventHandler(Form1_Load);
+            Resize += new EventHandler(Form1_Resize);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Use_Notify(); // Setting up all Property of Notifyicon 
+        }
+
+        private void Use_Notify()
+        {
+            MyNotify.ContextMenuStrip = contextMenuStrip1;
+            MyNotify.BalloonTipText = "This is A Sample Application";
+            MyNotify.BalloonTipTitle = "Your Application Name";
+            MyNotify.Text = "Node Proxy"; 
+            MyNotify.ShowBalloonTip(1);
+        }
+
+
+                private void Form1_Resize(object sender, System.EventArgs e)
+        {
+            // Hide The Form when it's minimized
+            if (FormWindowState.Minimized == this.WindowState)
+            {
+                MyNotify.Visible = true;
+                MyNotify.ShowBalloonTip(500);
+                this.Hide();
+            }
+            else if (FormWindowState.Normal == this.WindowState)
+            {
+                MyNotify.Visible = false;
+            }
+        }
+        private void MyNotify_DoubleClick(object sender, System.EventArgs e)
+        {
+            // Show the form when Dblclicked on Notifyicon
+            Show();
+            WindowState = FormWindowState.Normal;
+        }
+        private void mnuCloseApp_Click(object sender, EventArgs e)
+        {
+            // Will Close Your Application 
+            MyNotify.Dispose();
+            Application.Exit();
+        }
+
+        private void mnuShowApp_Click(object sender, EventArgs e)
+        {
+            //Will Restore Your Application 
+            Show();
+            WindowState = FormWindowState.Normal;
+        }
+
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            NodeProxyCommand();
+        }
+
+        private void mnuDomain_Click(object sender, EventArgs e)
+        {
+            NodeProxyCommand();  
+
+        }
+
+        static string ProgramFilesx86()
+        {
+            if (8 == IntPtr.Size
+                || (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROCESSOR_ARCHITEW6432"))))
+            {
+                return Environment.GetEnvironmentVariable("ProgramFiles(x86)");
+            }
+
+            return Environment.GetEnvironmentVariable("ProgramFiles");
+        }
+
+        private void NodeProxyCommand()
+        {
+            string ProgramFiles;
+            ProgramFiles = ProgramFilesx86();
+
+            string NodeInstallDir;
+            NodeInstallDir = ProgramFiles + "\\nodejs";
+
+            string NodeBat;
+            NodeBat = "nodevars.bat";
+
+            
+
+            string appPath = Path.GetDirectoryName(Application.ExecutablePath);
+            // hard code appPath because several directories 
+            // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
+            // when we need this for testing
+            appPath = @"C:\Users\Becky\Documents\zoovy\NodeProxy"; 
+
+
+            // run shell commands from C#
+            string strCmdText;
+            strCmdText = " /A /K cd " + NodeInstallDir + " & " +  NodeBat ;
+            // if we do not change the directory, then node starts in C:\Users\username
+            // ie - C:\Users\Becky
+            strCmdText += " & cd " + appPath;
+            strCmdText += " & node javascript/nodeproxy.js --domain=www.domain.com";
+            strCmdText += " --rootdir=./demo --key=./openssl/FakeRoot.key";
+            strCmdText += " --cert=./www.domain.com.crt";
+
+            
+            
+            
+            CMDprocess = new System.Diagnostics.Process();
+            
+            startInfo = new System.Diagnostics.ProcessStartInfo();
+            //startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden; 
+            startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+            //startInfo.RedirectStandardInput = true;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.UseShellExecute = false; //required to redirect
+            startInfo.FileName = "CMD.exe";
+            startInfo.Arguments = strCmdText;
+            CMDprocess.EnableRaisingEvents = true;
+            CMDprocess.StartInfo = startInfo;
+
+
+            CMDprocess.OutputDataReceived += new DataReceivedEventHandler(xOnOutputDataReceived);
+            //CMDprocess.Exited += new EventHandler(OnCmdExited);
+
+            CMDprocess.Start();
+            CMDprocess.BeginOutputReadLine();
+            CMDprocess.WaitForExit(); 
+
+            while (!processDone)
+                Thread.Sleep(100);
+            //System.IO.StreamReader SR = CMDprocess.StandardOutput;
+            
+            //System.IO.StreamWriter SW = CMDprocess.StandardInput;
+            //SW.WriteLine("@echo on");
+            //SW.WriteLine("cd\\"); //the command you wish to run.....
+
+
+            //CMDprocess.CloseMainWindow();
+
+            //CMDprocess.WaitForExit();
+        }
+
+
+        static void xOnOutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine("Output: " + e.Data);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            NodeProxyCmdClose();
+        }
+
+        private void NodeProxyCmdClose()
+        {
+            CMDprocess.CloseMainWindow();
+        }
+
+        static void OnCmdExited(object sender, EventArgs e)
+        {
+            Console.WriteLine("Process has finished executing.");
+            CMDprocess.OutputDataReceived -= new DataReceivedEventHandler(xOnOutputDataReceived);
+            //CMDprocess.ErrorDataReceived -= new DataReceivedEventHandler(OnErrorDataReceived);
+            CMDprocess.Exited -= new EventHandler(OnCmdExited);
+            processDone = true;
+        }
+
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Settings 1
+            MessageBox.Show("Your Application Settings 1");
+        }
+
+        private void settings2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Settings 2
+            MessageBox.Show("Your Application Settings 2");
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -46,7 +233,7 @@ namespace NodeProxy
             // http://stackoverflow.com/questions/5763313/openssl-net-create-certeficate-509x
             // ###################################################
             // Create a configuration object using openssl.cnf file.
-            Configuration cfg = new OpenSSL.X509.Configuration(@"C:\Users\Becky\Documents\zoovy\NodeProxy\openssl.cnf");
+            Configuration cfg = new OpenSSL.X509.Configuration(@"C:\Users\Becky\Documents\zoovy\NodeProxy\openssl\openssl.cnf");
             
             // Create a root certificate authority which will have a self signed certificate.
             X509CertificateAuthority RootCA = OpenSSL.X509.X509CertificateAuthority.SelfSigned(cfg, new SimpleSerialNumber(),"NodeProxyRoot CA", DateTime.Now, TimeSpan.FromDays(365));
@@ -114,5 +301,19 @@ namespace NodeProxy
             //bio.Dispose();
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            // use the output
+            //string output = outputBuilder.ToString();
+            //Console.WriteLine(output); 
+        }
+
+       
+
+      
+        
+
+       
     }
 }

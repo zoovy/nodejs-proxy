@@ -17,11 +17,20 @@ using Nini.Config;
 
 using System.Net;
 
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
+
 
 namespace NodeProxy
 {
     public partial class frmMain : Form
     {
+        [DllImport("wininet.dll")]
+        public static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
+        public const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
+        public const int INTERNET_OPTION_REFRESH = 37;
+        bool settingsReturn, refreshReturn;
+
         // Get the Proxy Information from the registry
         private string OrigProxyEnable;
         private string OrigProxyServer;
@@ -75,16 +84,25 @@ namespace NodeProxy
             InitializeComponent();
             Load += new EventHandler(frmMain_Load);
             Resize += new EventHandler(frmMain_Resize);
+            Closed += new EventHandler(frmMain_Closed);
         }
 
         private void frmMain_Load(object sender, EventArgs e)
         {
             appPath = Path.GetDirectoryName(Application.ExecutablePath);
+
+            DefaulProxySetting();
+
             Use_Notify(); // Setting up all Property of Notifyicon 
 
             LoadProxyIni();
 
             LoadDomains();
+        }
+
+        private void frmMain_Closed(object sender, EventArgs e)
+        {
+            EnableDisableProxy(false);
         }
 
         //
@@ -120,7 +138,8 @@ namespace NodeProxy
             // displays the values to the user 
             lblNodePath.Text = NodeInstallDir;
             lblProxyAddr.Text = NodeProxyAddress;
-            lblProxyAddr.Text = "127.0.0.1:8081";
+            // for testing
+            //lblProxyAddr.Text = "127.0.0.1:8081";
 
             // add the domains into list by splitting the string using comma as delimeter
             // used for loading the domains into the grid on the form and adding to menu in the system tray
@@ -285,8 +304,9 @@ namespace NodeProxy
                 // tag - incase we decide in the future to display the menu diferently to the user
                 DomainName = item.Tag.ToString();
                 // starts the node proxy from the domain selected
-                //NodeProxyCommand(DomainName);
-                NodeProxyCommand("www.domain.com");
+                NodeProxyCommand(DomainName);
+                //  for testing 
+                //NodeProxyCommand("www.domain.com");
             }
 
 
@@ -560,6 +580,10 @@ namespace NodeProxy
 
             if (CreateCert == true)
             {
+                string KeyName;
+                KeyName = appPath + @"\openssl\FakeRoot.key";
+                File.Copy(KeyName , CertKeyFileName);
+
                 var csrDetails = new X509Name();
                 csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
                 csrDetails.Country = "US";
@@ -761,33 +785,51 @@ namespace NodeProxy
             source.Save();
         }
 
-        // http://stackoverflow.com/questions/12050415/set-default-proxy-programmatically-instead-of-using-app-config
+        private void DefaulProxySetting()
+        {
+            OrigProxyEnable = "";
+            OrigProxyServer = "";
+            RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+            //registry.SetValue("ProxyEnable", 1);
+            //registry.SetValue("ProxyServer", "127.0.0.1:8080");
+            OrigProxyEnable = registry.GetValue(ProxyEnable).ToString();
+            if (registry.GetValue(ProxyServer) != null)
+            {
+            OrigProxyServer = registry.GetValue(ProxyServer).ToString();
+            }
+            registry.Close(); 
+        }
+
+
+        // http://stackoverflow.com/questions/197725/programmatically-set-browser-proxy-settings-in-c-sharp
         private void EnableDisableProxy(bool EnableProxy)
         {
-            string ip;
-            string  port;
+            RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
+            if (EnableProxy == true)
+            {
+                // enables the proxy based of NodeProxyAddress from the ini
+                registry.SetValue("ProxyEnable", 1);
+                registry.SetValue("ProxyServer", "127.0.0.1:8080");
+            }
+            else
+            {
+                // returns the proxy settings to original proxy settings in the computer
+                registry.SetValue("ProxyEnable", OrigProxyEnable);
+                registry.SetValue("ProxyServer", OrigProxyServer);
+            }
 
-             ip = "127.0.0.1";
-            port = "";
-            //WebProxy proxy = (WebProxy)WebRequest.GetSystemWebProxy();
-            //test = proxy.Address.AbsolutePath.ToString();
+            registry.Close(); 
 
-            //http://stackoverflow.com/questions/4254351/get-the-uri-from-the-default-web-proxy
-            var proxy = System.Net.HttpWebRequest.GetSystemWebProxy();
+            // These lines implement the Interface in the beginning of program 
+            // They cause the OS to refresh the settings, causing IP to realy update
+            settingsReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+            refreshReturn = InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
 
-            //gets the proxy uri, will only work if the request needs to go via the proxy 
-            //(i.e. the requested url isn't in the bypass list, etc)
-            Uri proxyUri = proxy.GetProxy(new Uri("http://www.google.com"));
-            
-            ip = proxyUri.Host.ToString();
-            port = proxyUri.Port.ToString();  
-            //http://stackoverflow.com/questions/14887679/whats-the-difference-between-webrequest-defaultwebproxy-and-webrequest-getsys
-            //System.Net.GlobalProxySelection.Select = new System.Net.WebProxy(ip, 8081);
-
-            // think this might be it for proxy
-            //http://www.dreamincode.net/forums/topic/160555-working-with-proxy-servers/
             
         }
+
+
+       
 
         // to Add test domain for proxy application
         //
@@ -898,6 +940,34 @@ namespace NodeProxy
 
             return DKey;
         }
+
+        // loads the form
+        private void btnProxyAddr_Click(object sender, EventArgs e)
+        {
+            string ProxyAddr = "";
+
+            frmProxySettings ProxySettingFrm = new frmProxySettings();
+            if (ProxySettingFrm.ShowDialog () == DialogResult.OK)
+            {
+                //
+                ProxyAddr = ProxySettingFrm.ProxyAddress;
+                // ProxyAddr was set and the ok button was click 
+                if (ProxyAddr.Length > 0)
+                {
+                    // saves the new address to variable and saves to ini file
+                    NodeProxyAddress = ProxyAddr; 
+
+
+                    source.Configs[MainIniConfig].Set(NodeProxyAddrKey , NodeProxyAddress );
+                    source.Save();
+
+                    // displays the changes to the user
+                    lblProxyAddr.Text = NodeProxyAddress; 
+                }
+            }
+        }
+
+       
 
         
         

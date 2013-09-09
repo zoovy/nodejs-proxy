@@ -39,7 +39,7 @@
             this.mnuCloseApp = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.button4 = new System.Windows.Forms.Button();
+            this.btnProxyAddr = new System.Windows.Forms.Button();
             this.btnNodeBrowse = new System.Windows.Forms.Button();
             this.listView1 = new System.Windows.Forms.ListView();
             this.Domain = new System.Windows.Forms.ColumnHeader();
@@ -128,14 +128,15 @@
             this.label2.TabIndex = 4;
             this.label2.Text = "Node JS Exec";
             // 
-            // button4
+            // btnProxyAddr
             // 
-            this.button4.Location = new System.Drawing.Point(273, 45);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 5;
-            this.button4.Text = "Select";
-            this.button4.UseVisualStyleBackColor = true;
+            this.btnProxyAddr.Location = new System.Drawing.Point(273, 45);
+            this.btnProxyAddr.Name = "btnProxyAddr";
+            this.btnProxyAddr.Size = new System.Drawing.Size(75, 23);
+            this.btnProxyAddr.TabIndex = 5;
+            this.btnProxyAddr.Text = "Select";
+            this.btnProxyAddr.UseVisualStyleBackColor = true;
+            this.btnProxyAddr.Click += new System.EventHandler(this.btnProxyAddr_Click);
             // 
             // btnNodeBrowse
             // 
@@ -249,7 +250,7 @@
             this.groupBox1.Controls.Add(this.lblNodePath);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.btnNodeBrowse);
-            this.groupBox1.Controls.Add(this.button4);
+            this.groupBox1.Controls.Add(this.btnProxyAddr);
             this.groupBox1.Location = new System.Drawing.Point(18, 255);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(459, 79);
@@ -311,7 +312,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuShowApp;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button btnProxyAddr;
         private System.Windows.Forms.Button btnNodeBrowse;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ColumnHeader Domain;

@@ -11,3 +11,4 @@ C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.pdb
 C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\bin\x86\Debug\Nini.dll
 C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.frmAddDomain.resources
 C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.frmMain.resources
+C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.frmProxySettings.resources

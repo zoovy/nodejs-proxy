@@ -45,6 +45,7 @@ namespace NodeProxy
         string appPath;
 
         // Name of the ini file that will be installed in the app.exe location
+        private string AppDataDir;
         private static string NodeIniFile = "\\ProxyConfig.ini";
         private IConfigSource source = null;
 
@@ -91,6 +92,13 @@ namespace NodeProxy
         {
             appPath = Path.GetDirectoryName(Application.ExecutablePath);
 
+            //AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+            //AppDataDir += "\\CommerceRack";
+
+            AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);   
+
+            //AppDataDir = @"C:\Users\Becky\Documents";
+
             DefaulProxySetting();
 
             Use_Notify(); // Setting up all Property of Notifyicon 
@@ -117,7 +125,7 @@ namespace NodeProxy
             string DomainCfgs;
 
             // Load the configuration source file
-            source = new IniConfigSource(appPath + NodeIniFile );
+            source = new IniConfigSource(AppDataDir + NodeIniFile);
             // gets the values from each key
             //
             // NodeInstalDir - Installation directory of Node.exe
@@ -164,61 +172,90 @@ namespace NodeProxy
             this.listView1.Items.Clear();
 
             // clears the items in the menu , customizing the menu base domains in the list
-            mnuNodeProxy.Items.Clear(); 
+            mnuNodeProxy.Items.Clear();
+
+                     
 
             DomainsHash  = new Hashtable();
 
-            for (int i = 0; i < DomainKeys.Count; i++)
+            if (DomainKeys != null)
             {
-                DomainKeyName = "";
-                DomainName = "";
-                ProjectDir = "";
-
-                // gets the Domain Key to look up the fields that we want to display in the listview
-                DomainKeyName = DomainKeys[i].ToString();
-                //Console.WriteLine(DomainKeyName);
-                IConfig DomainConfig = source.Configs[DomainKeyName];
-                if (DomainConfig != null)
-                {
-                    DomainName = source.Configs[DomainKeyName].Get(DomainKey);
-                    ProjectDir = source.Configs[DomainKeyName].Get(ProjectDirKey);
-                    // Add the domain information to our listview
-                    ListViewItem lvi = new ListViewItem(DomainName);
-                    lvi.SubItems.Add(ProjectDir);
-                    lvi.SubItems.Add("");
-                    this.listView1.Items.Add(lvi);
-
-                    ToolStripMenuItem mnuDomain = new ToolStripMenuItem(DomainName);
-                    mnuDomain.Tag = DomainName;
-                    mnuDomain.Click += new EventHandler(mnuDomain_Click);
-                    mnuNodeProxy.Items.Add(mnuDomain);
-
-                    // DomainsHash used for fast key lookup of the keys , since domain names are in the grid but not the keys
-                    if (DomainsHash.ContainsKey(DomainName) == false)
-                    {
-                        DomainsHash.Add(DomainName, DomainKeyName);
-                    }
-                }
                 
+                for (int i = 0; i < DomainKeys.Count; i++)
+                {
+                    DomainKeyName = "";
+                    DomainName = "";
+                    ProjectDir = "";
+
+
+                   
+                    // gets the Domain Key to look up the fields that we want to display in the listview
+                    DomainKeyName = DomainKeys[i].ToString();
+                    //Console.WriteLine(DomainKeyName);
+
+                    
+                    IConfig DomainConfig = source.Configs[DomainKeyName];
+
+                    
+
+                    if (DomainConfig != null)
+                    {
+                        DomainName = source.Configs[DomainKeyName].Get(DomainKey);
+                        ProjectDir = source.Configs[DomainKeyName].Get(ProjectDirKey);
+                        // Add the domain information to our listview
+                        ListViewItem lvi = new ListViewItem(DomainName);
+                        lvi.SubItems.Add(ProjectDir);
+                        lvi.SubItems.Add("");
+                        this.listView1.Items.Add(lvi);
+
+                        ToolStripMenuItem mnuDomain = new ToolStripMenuItem(DomainName);
+                        mnuDomain.Tag = DomainName;
+                        mnuDomain.Click += new EventHandler(mnuDomain_Click);
+                        mnuNodeProxy.Items.Add(mnuDomain);
+
+                        // DomainsHash used for fast key lookup of the keys , since domain names are in the grid but not the keys
+                        if (DomainsHash.ContainsKey(DomainName) == false)
+                        {
+                            DomainsHash.Add(DomainName, DomainKeyName);
+                        }
+                    }
+
+                }
             }
 
+            
+            
 
+
+           
             // Adds the standard menu in the system tray for the application
 
-            if (DomainKeys.Count == 0)
+            if (DomainKeys != null)
+            {
+                if (DomainKeys.Count == 0)
+                {
+                    // no domains - displays that there is no domains and when user clicks will bring up the configure screen
+                    ToolStripMenuItem mnuNone = new ToolStripMenuItem("No Domain Configured");
+                    mnuNone.Click += new EventHandler(mnuShowApp_Click);
+                    mnuNodeProxy.Items.Add(mnuNone);
+                }
+                else
+                {
+                    // domains exist, so it adds disconnect button
+                    ToolStripMenuItem mnuDisconnect = new ToolStripMenuItem("Disconnect");
+                    mnuDisconnect.Click += new EventHandler(mnuDisconnect_Click);
+                    mnuNodeProxy.Items.Add(mnuDisconnect);
+                }
+            }
+            else
             {
                 // no domains - displays that there is no domains and when user clicks will bring up the configure screen
                 ToolStripMenuItem mnuNone = new ToolStripMenuItem("No Domain Configured");
                 mnuNone.Click += new EventHandler(mnuShowApp_Click);
-                mnuNodeProxy.Items.Add(mnuNone); 
+                mnuNodeProxy.Items.Add(mnuNone);
             }
-            else
-            {
-                // domains exist, so it adds disconnect button
-                ToolStripMenuItem mnuDisconnect = new ToolStripMenuItem("Disconnect");
-                mnuDisconnect.Click += new EventHandler(mnuDisconnect_Click);
-                mnuNodeProxy.Items.Add(mnuDisconnect);
-            }
+           
+                      
 
             // Adds a seperator to make easier to read in the right click
             ToolStripSeparator ToolStripSep1 = new ToolStripSeparator();
@@ -245,8 +282,8 @@ namespace NodeProxy
 
             //MyNotify.ContextMenuStrip = contextMenuStrip1;
             MyNotify.ContextMenuStrip = mnuNodeProxy;
-            MyNotify.BalloonTipText = "This is A Sample Application";
-            MyNotify.BalloonTipTitle = "Your Application Name";
+            MyNotify.BalloonTipText = "CommerceRack NodeProxy";
+            MyNotify.BalloonTipTitle = "CommereRack NodeProxy";
             MyNotify.Text = "Node Proxy"; 
             MyNotify.ShowBalloonTip(1);
         }

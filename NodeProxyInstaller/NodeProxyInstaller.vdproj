@@ -27,6 +27,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_40F29DBE9E2946979C54E390BC1FA1E3"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_45B8C066E955478E8AD7B45535D7F344"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -64,12 +70,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_2C92A28A74A98D2FBCE69FCEE9D002CE"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_F3FC5701E1B745E68BF30076638EECF0"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -77,6 +77,12 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_B274A763335B383AA3994F87A0DD2C3B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_2C92A28A74A98D2FBCE69FCEE9D002CE"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -97,6 +103,27 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -113,6 +140,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -191,6 +226,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_40F29DBE9E2946979C54E390BC1FA1E3"
+            {
+            "SourcePath" = "8:..\\ProxyConfig.ini"
+            "TargetName" = "8:ProxyConfig.ini"
+            "Tag" = "8:"
+            "Folder" = "8:_874E72BDDD79431B93930DD86707DC49"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_45B8C066E955478E8AD7B45535D7F344"
@@ -310,6 +365,18 @@
         }
         "Folder"
         {
+            "{994432C3-9487-495D-8656-3E829A8DBDDE}:_4A46415BDB814DF0BA90B3C259C5E248"
+            {
+            "DefaultLocation" = "8:[CommonAppDataFolder][Manufacturer]"
+            "Name" = "8:Common Application Data Folder"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:COMMONAPPDATFOLDER"
+                "Folders"
+                {
+                }
+            }
             "{1525181F-901A-416C-8A58-119130FE478E}:_64D8119E169E4588BEB021CD49067EF0"
             {
             "Name" = "8:#1919"
@@ -355,6 +422,17 @@
                     }
                 }
             }
+            "{1525181F-901A-416C-8A58-119130FE478E}:_874E72BDDD79431B93930DD86707DC49"
+            {
+            "Name" = "8:#1918"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:PersonalFolder"
+                "Folders"
+                {
+                }
+            }
             "{1525181F-901A-416C-8A58-119130FE478E}:_9DF149C8BBA94A79B00780473B4914E6"
             {
             "Name" = "8:#1916"
@@ -382,14 +460,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:CommerceRack Node Proxy 1.0.0"
-        "ProductCode" = "8:{02DAADCE-9E84-4589-80BB-D115210522A4}"
-        "PackageCode" = "8:{1EE82D42-58CD-45B4-924C-8F797F6C3407}"
+        "ProductCode" = "8:{3F708EF1-2FEA-4B51-BA4F-BA7EDDF2AE61}"
+        "PackageCode" = "8:{973ACA45-0313-408E-B394-7763834A8F85}"
         "UpgradeCode" = "8:{50150AD6-D237-4F19-8BEC-51F490128803}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:CommerceRack"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

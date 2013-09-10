@@ -47,7 +47,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.btnAddNew = new System.Windows.Forms.Button();
             this.txtNodeLog = new System.Windows.Forms.RichTextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.ckAutoProxy = new System.Windows.Forms.CheckBox();
             this.lblNodePath = new System.Windows.Forms.Label();
             this.lblProxyAddr = new System.Windows.Forms.Label();
@@ -55,8 +54,14 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnLoadLog = new System.Windows.Forms.Button();
             this.btnClearLog = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuHelpIndex = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnRemove = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // MyNotify
@@ -130,7 +135,7 @@
             // 
             // btnProxyAddr
             // 
-            this.btnProxyAddr.Location = new System.Drawing.Point(273, 45);
+            this.btnProxyAddr.Location = new System.Drawing.Point(384, 50);
             this.btnProxyAddr.Name = "btnProxyAddr";
             this.btnProxyAddr.Size = new System.Drawing.Size(75, 23);
             this.btnProxyAddr.TabIndex = 5;
@@ -140,7 +145,7 @@
             // 
             // btnNodeBrowse
             // 
-            this.btnNodeBrowse.Location = new System.Drawing.Point(273, 16);
+            this.btnNodeBrowse.Location = new System.Drawing.Point(384, 16);
             this.btnNodeBrowse.Name = "btnNodeBrowse";
             this.btnNodeBrowse.Size = new System.Drawing.Size(75, 23);
             this.btnNodeBrowse.TabIndex = 6;
@@ -181,7 +186,7 @@
             // 
             // btnAddNew
             // 
-            this.btnAddNew.Location = new System.Drawing.Point(402, 226);
+            this.btnAddNew.Location = new System.Drawing.Point(315, 215);
             this.btnAddNew.Name = "btnAddNew";
             this.btnAddNew.Size = new System.Drawing.Size(75, 23);
             this.btnAddNew.TabIndex = 10;
@@ -191,25 +196,16 @@
             // 
             // txtNodeLog
             // 
-            this.txtNodeLog.Location = new System.Drawing.Point(16, 356);
+            this.txtNodeLog.Location = new System.Drawing.Point(18, 371);
             this.txtNodeLog.Name = "txtNodeLog";
             this.txtNodeLog.Size = new System.Drawing.Size(428, 151);
             this.txtNodeLog.TabIndex = 11;
             this.txtNodeLog.Text = "";
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(20, 337);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(90, 13);
-            this.label5.TabIndex = 12;
-            this.label5.Text = "Proxy Is: Running";
-            // 
             // ckAutoProxy
             // 
             this.ckAutoProxy.AutoSize = true;
-            this.ckAutoProxy.Location = new System.Drawing.Point(22, 226);
+            this.ckAutoProxy.Location = new System.Drawing.Point(16, 74);
             this.ckAutoProxy.Name = "ckAutoProxy";
             this.ckAutoProxy.Size = new System.Drawing.Size(194, 17);
             this.ckAutoProxy.TabIndex = 13;
@@ -237,7 +233,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(162, 340);
+            this.label6.Location = new System.Drawing.Point(164, 355);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(59, 13);
             this.label6.TabIndex = 16;
@@ -246,6 +242,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.ckAutoProxy);
             this.groupBox1.Controls.Add(this.lblProxyAddr);
             this.groupBox1.Controls.Add(this.lblNodePath);
             this.groupBox1.Controls.Add(this.label2);
@@ -253,14 +250,14 @@
             this.groupBox1.Controls.Add(this.btnProxyAddr);
             this.groupBox1.Location = new System.Drawing.Point(18, 255);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(459, 79);
+            this.groupBox1.Size = new System.Drawing.Size(459, 97);
             this.groupBox1.TabIndex = 17;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Configuration";
             // 
             // btnLoadLog
             // 
-            this.btnLoadLog.Location = new System.Drawing.Point(454, 390);
+            this.btnLoadLog.Location = new System.Drawing.Point(456, 405);
             this.btnLoadLog.Name = "btnLoadLog";
             this.btnLoadLog.Size = new System.Drawing.Size(69, 25);
             this.btnLoadLog.TabIndex = 18;
@@ -270,7 +267,7 @@
             // 
             // btnClearLog
             // 
-            this.btnClearLog.Location = new System.Drawing.Point(454, 439);
+            this.btnClearLog.Location = new System.Drawing.Point(456, 454);
             this.btnClearLog.Name = "btnClearLog";
             this.btnClearLog.Size = new System.Drawing.Size(69, 25);
             this.btnClearLog.TabIndex = 19;
@@ -278,25 +275,71 @@
             this.btnClearLog.UseVisualStyleBackColor = true;
             this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.helpToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(525, 24);
+            this.menuStrip1.TabIndex = 20;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuHelpAbout,
+            this.mnuHelpIndex});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // mnuHelpAbout
+            // 
+            this.mnuHelpAbout.Name = "mnuHelpAbout";
+            this.mnuHelpAbout.Size = new System.Drawing.Size(152, 22);
+            this.mnuHelpAbout.Text = "About";
+            this.mnuHelpAbout.Click += new System.EventHandler(this.mnuHelpAbout_Click);
+            // 
+            // mnuHelpIndex
+            // 
+            this.mnuHelpIndex.Name = "mnuHelpIndex";
+            this.mnuHelpIndex.Size = new System.Drawing.Size(152, 22);
+            this.mnuHelpIndex.Text = "Index";
+            this.mnuHelpIndex.Click += new System.EventHandler(this.mnuHelpIndex_Click);
+            // 
+            // btnRemove
+            // 
+            this.btnRemove.Location = new System.Drawing.Point(402, 215);
+            this.btnRemove.Name = "btnRemove";
+            this.btnRemove.Size = new System.Drawing.Size(75, 23);
+            this.btnRemove.TabIndex = 21;
+            this.btnRemove.Text = "Remove";
+            this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(525, 519);
+            this.ClientSize = new System.Drawing.Size(525, 534);
+            this.Controls.Add(this.btnRemove);
+            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.listView1);
             this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.btnLoadLog);
-            this.Controls.Add(this.ckAutoProxy);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.listView1);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.btnAddNew);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.btnAddNew);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.txtNodeLog);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmMain";
             this.contextMenuStrip1.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -320,7 +363,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btnAddNew;
         private System.Windows.Forms.RichTextBox txtNodeLog;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.CheckBox ckAutoProxy;
         private System.Windows.Forms.ToolStripMenuItem mnuDisconnect;
         private System.Windows.Forms.Label lblNodePath;
@@ -329,6 +371,11 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btnLoadLog;
         private System.Windows.Forms.Button btnClearLog;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuHelpAbout;
+        private System.Windows.Forms.ToolStripMenuItem mnuHelpIndex;
+        private System.Windows.Forms.Button btnRemove;
     }
 }
 

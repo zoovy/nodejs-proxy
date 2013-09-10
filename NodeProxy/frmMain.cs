@@ -71,7 +71,7 @@ namespace NodeProxy
 
         private string ProjectDir;
         private string CertKeyFileName;
-        private string CertFileName;
+        private string PemFileName;
 
         private ContextMenuStrip mnuNodeProxy;
 
@@ -341,7 +341,7 @@ namespace NodeProxy
                 // tag - incase we decide in the future to display the menu diferently to the user
                 DomainName = item.Tag.ToString();
                 // starts the node proxy from the domain selected
-                NodeProxyCommand(DomainName);
+                NodeProxyStart(DomainName);
                 //  for testing 
                 //NodeProxyCommand("www.domain.com");
             }
@@ -361,7 +361,49 @@ namespace NodeProxy
             return Environment.GetEnvironmentVariable("ProgramFiles");
         }
 
-        private void NodeProxyCommand(string DomainName)
+        private string FindNodeExePath()
+        {
+            
+            string fileNameToFind = "\\Node.exe";
+
+          
+
+            
+            // some common sense places we *might* find Node.exe
+            var dirsToSearchForNodeExec = new string[] { 
+                @"C:\program files\nodejs",
+                @"C:\program files\Node64",
+                @"C:\program files\NodeJS64",
+                @ProgramFilesx86()+ "\\nodejs",
+                @ProgramFilesx86()+ "\\Node64",
+                @ProgramFilesx86()+ "\\NodeJS64",
+                };
+
+            //string directoryToSearch = @"C:\\program files\nodejs";
+            var NodeExecPath = "";
+            foreach (string value in dirsToSearchForNodeExec)
+            {
+                if (NodeExecPath == "")
+                {
+                    //string[] files = Directory.GetFileSystemEntries(directoryToSearch, fileNameToFind);
+                    //foreach (string f in files)
+                    //{
+                    //    NodeExecPath = f;
+                    //    Console.WriteLine("File: " + f);
+                    //}
+                    if (File.Exists(value + fileNameToFind) == true)
+                    {
+                        NodeExecPath = value;
+                    }
+                }
+            }
+
+            Console.WriteLine("Found:" + NodeExecPath);
+
+            return NodeExecPath;
+        }
+
+        private void NodeProxyStart(string DomainName)
         {
             bool StartNodeProxy = true;
 
@@ -371,14 +413,19 @@ namespace NodeProxy
 
             ProjectDir = "./demo";
             CertKeyFileName = "./openssl/FakeRoot.key";
-            CertFileName = "./www.domain.com.crt";
+            PemFileName = "./www.domain.com.crt";
 
             // node.exe installation directory can not be blank, checks before continuing         
             if (NodeInstallDir.Length == 0)
             {
-                MessageBox.Show("Node Installation Directory is blank. Please browse for the directory by hitting the select.", 
-                    "Directory is blank", MessageBoxButtons.OK);
-                StartNodeProxy = false;
+                NodeInstallDir = FindNodeExePath();
+                if (NodeInstallDir.Length == 0)
+                {
+                    MessageBox.Show("Can not find the Node.exe. Please check to see if Node.exe is installed",
+                        "Can not find node.exe", MessageBoxButtons.OK);
+                    StartNodeProxy = false;
+                }
+                
             }
 
             // checks see if the node.exe exists
@@ -399,7 +446,7 @@ namespace NodeProxy
             {
                 // loads the fields  - projectdir, certkey, certfile 
                 // returns false - if one of the fields fail in loading
-                StartNodeProxy = LoadDomainFields(DomainName);  
+                StartNodeProxy = LoadDomainFields(DomainName, false);  
             }
 
             if (StartNodeProxy == true)
@@ -446,13 +493,17 @@ namespace NodeProxy
                 //strCmdText += " & cd " + appPath;
                 // hard code appPath because several directories 
                 // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
+                CertKeyFileName = PemFileName;
+
+                CertKeyFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\FakeRoot.key";
+                PemFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
                 // when we are using appPathLoc for testing
                 strCmdText += " & cd " + appPathLoc;
                 strCmdText += " & node.exe javascript/nodeproxy.js ";
                 strCmdText += "--domain=" + DomainName;
                 strCmdText += " --rootdir=" + ProjectDir;
                 strCmdText += " --key=" + CertKeyFileName ;
-                strCmdText += " --cert=" + CertFileName ;
+                strCmdText += " --cert=" + PemFileName ;
                 Console.WriteLine(strCmdText);
 
 
@@ -613,13 +664,11 @@ namespace NodeProxy
         {
             bool CreateCert = true;
 
-            CreateCert = LoadDomainFields(domain);
+            CreateCert = LoadDomainFields(domain, true);
 
             if (CreateCert == true)
             {
-                string KeyName;
-                KeyName = appPath + @"\openssl\FakeRoot.key";
-                File.Copy(KeyName , CertKeyFileName);
+               
 
                 var csrDetails = new X509Name();
                 csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
@@ -678,28 +727,37 @@ namespace NodeProxy
                 // Once you have a request object, you can create a SSL Certificate which is signed by the self signed RootCA.
                 OpenSSL.X509.X509Certificate certificate = RootCA.ProcessRequest(Request, DateTime.Now, DateTime.Now + TimeSpan.FromDays(365 * 10));
 
-                // Now you can save this certificate to your file system.
-                FileStream fs = new FileStream(CertFileName, FileMode.Create, FileAccess.ReadWrite);
-                //FileStream fs = new FileStream(@"C:\Users\Becky\Documents\zoovy\NodeProxy\" + domain + ".crt", FileMode.Create, FileAccess.ReadWrite);
-                BinaryWriter bw = new BinaryWriter(fs);
                 BIO bio = BIO.MemoryBuffer();
                 certificate.Write(bio);
                 string certString = bio.ReadString();
+
+                FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.ReadWrite);
+                BinaryReader br = new BinaryReader(fsKey);
+                //long  bytesLength = fsKey.Length;
+                //br.ReadBytes(Convert.ToInt32(fsKey.Length));
+                certString += System.Text.Encoding.ASCII.GetString(br.ReadBytes(Convert.ToInt32(fsKey.Length))); 
+                br.Close();
+                fsKey.Close();
+
+                // Now you can save this certificate to your file system.
+                FileStream fs = new FileStream(PemFileName, FileMode.Create, FileAccess.ReadWrite);
+                //FileStream fs = new FileStream(@"C:\Users\Becky\Documents\zoovy\NodeProxy\" + domain + ".crt", FileMode.Create, FileAccess.ReadWrite);
+                BinaryWriter bw = new BinaryWriter(fs);
                 bw.Write(certString);
                 bw.Close();
-
+                fs.Close();
 
             }
          
           }
 
-        private bool LoadDomainFields(string DomainName)
+        private bool LoadDomainFields(string DomainName, bool createpem)
         {
             bool DomainFieldsSucess = true;
 
             ProjectDir = "";
             CertKeyFileName = "";
-            CertFileName = "";
+            PemFileName = "";
 
             if (DomainsHash.ContainsKey(DomainName) == true)
             {
@@ -717,14 +775,14 @@ namespace NodeProxy
                     ProjectDir = source.Configs[DKey].Get(ProjectDirKey);
                     if ((Directory.Exists(ProjectDir) == true) && (DomainFieldsSucess == true))
                     {
-                        CertKeyFileName = ProjectDir + @"\FakeRoot.key";
+                        CertKeyFileName = appPath + @"\openssl\\FakeRoot.key" ;
                         if (File.Exists(CertKeyFileName) == true)
                         {
-                            CertFileName = ProjectDir + @"\" + DomainName + ".crt";
-                            if (File.Exists(CertKeyFileName) == false)
+                            PemFileName = ProjectDir + @"\" + DomainName + ".pem";
+                            if ((File.Exists(CertKeyFileName) == false) && (createpem == false))
                             {
                                 // certificate does not exist - so can not load the necessary info to start the proxy
-                                MessageBox.Show("Certificate does not exist: " + CertFileName,
+                                MessageBox.Show("Certificate does not exist: " + PemFileName,
                                    "Certificate does not exist", MessageBoxButtons.OK);
                                 DomainFieldsSucess = false;
                             }
@@ -1002,6 +1060,96 @@ namespace NodeProxy
                     lblProxyAddr.Text = NodeProxyAddress; 
                 }
             }
+        }
+
+
+        private void RemoveDomain(string domain)
+        {
+            string DConfigs = "";
+
+
+            if (DomainsHash.ContainsKey(domain) == true)
+            {
+                // removes the fields and config header from the ini file
+                string DKey;
+                DKey = DomainsHash[domain ].ToString();
+                if (DKey.Length > 0)
+                {
+                    IConfig DomainConfig = source.Configs[DKey];
+                    if (DomainConfig != null)
+                    {
+                        DomainConfig.Remove(ProjectDirKey);
+                        DomainConfig.Remove(DomainKey); 
+                    }
+
+                    source.Configs.Remove(DomainConfig);
+                }
+
+                if (DomainKeys != null)
+                {
+                    // removes the key from the list
+                    DomainKeys.Remove(DKey);
+
+                    // updates the DomainConfigs list 
+                    // the list is saved comma seperate
+                    for (int i = 0; i < DomainKeys.Count; i++)
+                    {
+
+                        if (i == 0)
+                        {
+                            DConfigs = DomainKeys[i].ToString();
+                        }
+                        else
+                        {
+                            DConfigs += "," + DomainKeys[i].ToString();
+
+                        }
+                    }
+
+                    // saves the DomainConfigs list
+                    source.Configs[MainIniConfig].Set(DomainCfgsKey, DConfigs);
+                }
+                
+                source.Save();
+
+                // refreshes the list view
+                LoadDomains();
+            }
+
+        }
+
+        // lauches the browser and displays the help page
+        private void mnuHelpIndex_Click(object sender, EventArgs e)
+        {
+            string url = "https://github.com/zoovy/nodejs-proxy/wiki";
+
+            System.Diagnostics.Process.Start(url);
+        }
+
+        // removes the domain name from the list
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
+            string domain;
+            ListView.SelectedIndexCollection sel = listView1.SelectedIndices;
+            if (sel.Count == 1)
+            {
+                ListViewItem selItem = listView1.Items[sel[0]];
+                domain  = selItem.SubItems[0].Text;
+
+                if (MessageBox.Show("Do you want to remove domain:" + domain , "Remove Domain", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    // removes the domain for the ini and listview 
+                    RemoveDomain(domain);
+                }
+               
+            }
+        }
+
+        // displays the about form - information comes the file - AssemblyInfo.cs
+        private void mnuHelpAbout_Click(object sender, EventArgs e)
+        {
+            frmAbout AboutFrm = new frmAbout();
+            AboutFrm.ShowDialog(); 
         }
 
        

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeProxy", "NodeProxy\NodeProxy.csproj", "{CD7EBF18-D44F-4AD2-BAB2-CCCCA4DC15D8}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NodeProxyInstaller", "NodeProxyInstaller\NodeProxyInstaller.vdproj", "{B58AFEDC-02F9-4DA3-BCAA-BEB5FA0A3202}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,10 +19,6 @@ Global
 		{CD7EBF18-D44F-4AD2-BAB2-CCCCA4DC15D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CD7EBF18-D44F-4AD2-BAB2-CCCCA4DC15D8}.Release|x86.ActiveCfg = Release|x86
 		{CD7EBF18-D44F-4AD2-BAB2-CCCCA4DC15D8}.Release|x86.Build.0 = Release|x86
-		{B58AFEDC-02F9-4DA3-BCAA-BEB5FA0A3202}.Debug|Any CPU.ActiveCfg = Debug
-		{B58AFEDC-02F9-4DA3-BCAA-BEB5FA0A3202}.Debug|x86.ActiveCfg = Debug
-		{B58AFEDC-02F9-4DA3-BCAA-BEB5FA0A3202}.Release|Any CPU.ActiveCfg = Release
-		{B58AFEDC-02F9-4DA3-BCAA-BEB5FA0A3202}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

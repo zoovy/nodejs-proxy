@@ -13,3 +13,6 @@ C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.frmMa
 C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.frmProxySettings.resources
 C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.frmAbout.resources
 C:\Users\Becky\Documents\zoovy\NodeProxy\NodeProxy\obj\x86\Debug\NodeProxy.csprojResolveAssemblyReference.cache
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.exe.config
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.exe
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.pdb

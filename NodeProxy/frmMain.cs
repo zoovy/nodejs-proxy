@@ -46,8 +46,8 @@ namespace NodeProxy
 
         // Name of the ini file that will be installed in the app.exe location
         private string AppDataDir;
-        private static string NodeIniFile = "\\ProxyConfig.ini";
-        private IConfigSource source = null;
+        private static string ProxyIniFileName = "\\ProxyConfig.ini";
+        private IConfigSource ProxyIni = null;
 
         // Constants values for the ini 
         //
@@ -66,8 +66,8 @@ namespace NodeProxy
         private Hashtable DomainsHash;
         
 
-        private string NodeInstallDir;
-        private string NodeProxyAddress;
+        private string NodeInstallDir = "";
+        private string NodeProxyAddress = "";
 
         private string ProjectDir;
         private string CertKeyFileName;
@@ -121,22 +121,61 @@ namespace NodeProxy
         // Intialize the default values of the program by opening and loading the ini 
         private void LoadProxyIni()
         {
-            string AutoEnableStr;
-            string DomainCfgs;
+            string AutoEnableStr = "0";
+            string DomainCfgs = "";
 
-            // Load the configuration source file
-            source = new IniConfigSource(AppDataDir + NodeIniFile);
-            // gets the values from each key
-            //
-            // NodeInstalDir - Installation directory of Node.exe
-            // NodeProxyAddress - Proxy Address for testing using NodeProxy.js
-            // AutoEnableStr - Setting for automatically turning on the proxy settings - if set 1 - then proxy will be turn on
-            // DomainConfgs - comma seperate list of the domain headers inside the ini
-            NodeInstallDir = source.Configs[MainIniConfig].Get(NodeInstallKey);
-            NodeProxyAddress = source.Configs[MainIniConfig].Get(NodeProxyAddrKey);
-            AutoEnableStr = source.Configs[MainIniConfig].Get(AutoProxyKey);
-            DomainCfgs = source.Configs[MainIniConfig].Get(DomainCfgsKey);
- 
+            // Load the configuration ProxyIni file
+
+
+            if (File.Exists(AppDataDir + ProxyIniFileName) == true)
+            {
+                ProxyIni = new IniConfigSource(AppDataDir + ProxyIniFileName);
+                // gets the values from each key
+                //
+                // NodeInstalDir - Installation directory of Node.exe
+                // NodeProxyAddress - Proxy Address for testing using NodeProxy.js
+                // AutoEnableStr - Setting for automatically turning on the proxy settings - if set 1 - then proxy will be turn on
+                // DomainConfgs - comma seperate list of the domain headers inside the ini
+                NodeInstallDir = ProxyIni.Configs[MainIniConfig].Get(NodeInstallKey);
+                NodeProxyAddress = ProxyIni.Configs[MainIniConfig].Get(NodeProxyAddrKey);
+                AutoEnableStr = ProxyIni.Configs[MainIniConfig].Get(AutoProxyKey);
+                DomainCfgs = ProxyIni.Configs[MainIniConfig].Get(DomainCfgsKey);
+            }
+            else
+            {
+                ProxyIni = new IniConfigSource();
+                ProxyIni.Configs.Add(MainIniConfig);
+                txtNodeLog.Text += AppDataDir + ProxyIniFileName + "not found.\n";
+
+            }
+
+            if ((NodeProxyAddress == null) || (NodeProxyAddress.Length == 0)) {
+                // a reasonable guess for the proxy server
+                NodeProxyAddress = "127.0.0.1:8081";
+                txtNodeLog.Text += "Auto-guess Proxy server: " + NodeProxyAddress + "\n";
+            }
+
+
+            if ((NodeInstallDir == null) || (NodeInstallDir.Length == 0))
+            {
+                NodeInstallDir = FindNodeExePath();
+                if (NodeInstallDir.Length > 0)
+                {
+                    txtNodeLog.Text += "Guessed Node.exe path: " + NodeInstallDir + "\n";
+                    // maybe we should tell the user that we have node installed
+                    // and that we auto-detected it. ??
+                }
+                else
+                {
+                    txtNodeLog.Text += "*** ERROR *** Node.exe not found -- please install nodejs\n";
+                }
+            }
+
+            if (NodeInstallDir.Length == 0)
+            {
+                    // warn the user node isn't installed and they're going to have a bad time.
+            }
+
 
             if (AutoEnableStr == "1")
             {
@@ -194,14 +233,14 @@ namespace NodeProxy
                     //Console.WriteLine(DomainKeyName);
 
                     
-                    IConfig DomainConfig = source.Configs[DomainKeyName];
+                    IConfig DomainConfig = ProxyIni.Configs[DomainKeyName];
 
                     
 
                     if (DomainConfig != null)
                     {
-                        DomainName = source.Configs[DomainKeyName].Get(DomainKey);
-                        ProjectDir = source.Configs[DomainKeyName].Get(ProjectDirKey);
+                        DomainName = ProxyIni.Configs[DomainKeyName].Get(DomainKey);
+                        ProjectDir = ProxyIni.Configs[DomainKeyName].Get(ProjectDirKey);
                         // Add the domain information to our listview
                         ListViewItem lvi = new ListViewItem(DomainName);
                         lvi.SubItems.Add(ProjectDir);
@@ -417,17 +456,12 @@ namespace NodeProxy
 
             // node.exe installation directory can not be blank, checks before continuing         
             if (NodeInstallDir.Length == 0)
-            {
-                NodeInstallDir = FindNodeExePath();
-                if (NodeInstallDir.Length == 0)
                 {
                     MessageBox.Show("Can not find the Node.exe. Please check to see if Node.exe is installed",
                         "Can not find node.exe", MessageBoxButtons.OK);
                     StartNodeProxy = false;
                 }
                 
-            }
-
             // checks see if the node.exe exists
             if (StartNodeProxy == true)
             {
@@ -454,9 +488,6 @@ namespace NodeProxy
 
                 string NodeBat;
                 NodeBat = "nodevars.bat";
-
-
-
 
                 string appPathLoc;
                 // hard code appPath because several directories 
@@ -668,8 +699,8 @@ namespace NodeProxy
 
             if (CreateCert == true)
             {
-               
 
+                
                 var csrDetails = new X509Name();
                 csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
                 csrDetails.Country = "US";
@@ -759,6 +790,9 @@ namespace NodeProxy
 
 
 
+        //
+        // this has a bug, it only references/checks the first domain
+        //
         private bool LoadDomainFields(string DomainName, bool createpem)
         {
             bool DomainFieldsSucess = true;
@@ -773,14 +807,14 @@ namespace NodeProxy
                 DKey = DomainsHash[DomainName].ToString();
                 if (DKey.Length > 0)
                 {
-                    IConfig DomainConfig = source.Configs[DKey];
+                    IConfig DomainConfig = ProxyIni.Configs[DKey];
                     if (DomainConfig == null)
                     {
                         // key is not in the ini file
                         DomainFieldsSucess = false;
                     }
                     // grabs the variables - projectdir, key, cert from ini file
-                    ProjectDir = source.Configs[DKey].Get(ProjectDirKey);
+                    ProjectDir = ProxyIni.Configs[DKey].Get(ProjectDirKey);
                     if ((Directory.Exists(ProjectDir) == true) && (DomainFieldsSucess == true))
                     {
                         CertKeyFileName = appPath + @"\openssl\\FakeRoot.key" ;
@@ -861,8 +895,8 @@ namespace NodeProxy
                 lblNodePath.Text = NodeInstallDir;
 
                 // saves the node.exe installation directory to ini
-                source.Configs[MainIniConfig].Set(NodeInstallKey, NodeInstallDir);
-                source.Save();
+                ProxyIni.Configs[MainIniConfig].Set(NodeInstallKey, NodeInstallDir);
+                ProxyIni.Save();
                 
             }
         }
@@ -884,8 +918,8 @@ namespace NodeProxy
 
             EnableDisableProxy(true);
 
-            source.Configs[MainIniConfig].Set(AutoProxyKey , AutoProxy);
-            source.Save();
+            ProxyIni.Configs[MainIniConfig].Set(AutoProxyKey , AutoProxy);
+            ProxyIni.Save();
         }
 
         private void DefaulProxySetting()
@@ -983,26 +1017,28 @@ namespace NodeProxy
                 }
                 
                 // saves the DomainConfigs list
-                source.Configs[MainIniConfig].Set(DomainCfgsKey , DConfigs );
+                ProxyIni.Configs[MainIniConfig].Set(DomainCfgsKey, DConfigs);
 
                 // Adds the new key for domain to ini
-                source.AddConfig(Dkey);
+                ProxyIni.AddConfig(Dkey);
 
                 // adds domain and the project directory to the ini using the new domain ket
-                source.Configs[Dkey].Set(DomainKey , Domain );
-                source.Configs[Dkey].Set(ProjectDirKey, PrjDir);
+                ProxyIni.Configs[Dkey].Set(DomainKey , Domain );
+                ProxyIni.Configs[Dkey].Set(ProjectDirKey, PrjDir);
 
                 // saves the ini file before we begin the next step
-                source.Save();
+
+                // System.IO.File.WriteAllLines(AppDataDir+ProxyIniFileName, );
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(AppDataDir+ProxyIniFileName, true))
+                {
+                    file.WriteLine(ProxyIni.ToString());
+                }
 
                 // refreshes the list view and loads the domains
                 LoadDomains();
 
                 // create certificate 
-                CreateDomainCrt(Domain); 
-
-               
-                
+                CreateDomainCrt(Domain);                
             }
         }
 
@@ -1061,8 +1097,8 @@ namespace NodeProxy
                     NodeProxyAddress = ProxyAddr; 
 
 
-                    source.Configs[MainIniConfig].Set(NodeProxyAddrKey , NodeProxyAddress );
-                    source.Save();
+                    ProxyIni.Configs[MainIniConfig].Set(NodeProxyAddrKey , NodeProxyAddress );
+                    ProxyIni.Save();
 
                     // displays the changes to the user
                     lblProxyAddr.Text = NodeProxyAddress; 
@@ -1083,14 +1119,14 @@ namespace NodeProxy
                 DKey = DomainsHash[domain ].ToString();
                 if (DKey.Length > 0)
                 {
-                    IConfig DomainConfig = source.Configs[DKey];
+                    IConfig DomainConfig = ProxyIni.Configs[DKey];
                     if (DomainConfig != null)
                     {
                         DomainConfig.Remove(ProjectDirKey);
                         DomainConfig.Remove(DomainKey); 
                     }
 
-                    source.Configs.Remove(DomainConfig);
+                    ProxyIni.Configs.Remove(DomainConfig);
                 }
 
                 if (DomainKeys != null)
@@ -1115,10 +1151,10 @@ namespace NodeProxy
                     }
 
                     // saves the DomainConfigs list
-                    source.Configs[MainIniConfig].Set(DomainCfgsKey, DConfigs);
+                    ProxyIni.Configs[MainIniConfig].Set(DomainCfgsKey, DConfigs);
                 }
                 
-                source.Save();
+                ProxyIni.Save();
 
                 // refreshes the list view
                 LoadDomains();

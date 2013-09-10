@@ -495,8 +495,8 @@ namespace NodeProxy
                 // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
                 CertKeyFileName = PemFileName;
 
-                CertKeyFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\FakeRoot.key";
-                PemFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
+                //CertKeyFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\FakeRoot.key";
+                //PemFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
                 // when we are using appPathLoc for testing
                 strCmdText += " & cd " + appPathLoc;
                 strCmdText += " & node.exe javascript/nodeproxy.js ";
@@ -729,12 +729,12 @@ namespace NodeProxy
 
                 BIO bio = BIO.MemoryBuffer();
                 certificate.Write(bio);
-                string certString = bio.ReadString();
+                string certString;
+                certString = bio.ReadString();
 
+                // opens the key file and appends to the crt to help create the pem file
                 FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.ReadWrite);
                 BinaryReader br = new BinaryReader(fsKey);
-                //long  bytesLength = fsKey.Length;
-                //br.ReadBytes(Convert.ToInt32(fsKey.Length));
                 certString += System.Text.Encoding.ASCII.GetString(br.ReadBytes(Convert.ToInt32(fsKey.Length))); 
                 br.Close();
                 fsKey.Close();
@@ -743,13 +743,21 @@ namespace NodeProxy
                 FileStream fs = new FileStream(PemFileName, FileMode.Create, FileAccess.ReadWrite);
                 //FileStream fs = new FileStream(@"C:\Users\Becky\Documents\zoovy\NodeProxy\" + domain + ".crt", FileMode.Create, FileAccess.ReadWrite);
                 BinaryWriter bw = new BinaryWriter(fs);
-                bw.Write(certString);
+                //bw.Write(certString);
+                // adding ascii coding to write the pem file correctly
+                // must write as arrey of bytes 
+                // writing to string adds characters
+                bw.Write(System.Text.Encoding.ASCII.GetBytes(certString));
                 bw.Close();
                 fs.Close();
 
             }
          
           }
+
+       
+
+
 
         private bool LoadDomainFields(string DomainName, bool createpem)
         {

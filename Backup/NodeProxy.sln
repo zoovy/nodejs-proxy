@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeProxy", "NodeProxy\NodeProxy.csproj", "{CD7EBF18-D44F-4AD2-BAB2-CCCCA4DC15D8}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "NodeProxyInstaller", "NodeProxyInstaller\NodeProxyInstaller.vdproj", "{B58AFEDC-02F9-4DA3-BCAA-BEB5FA0A3202}"

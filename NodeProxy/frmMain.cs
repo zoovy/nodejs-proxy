@@ -876,7 +876,7 @@ namespace NodeProxy
 
             if (ErrorMsg != "") {
                 // txtNodeLog += "ERROR: "+ErrorMsg+"\n";
-                MessageBox.Show("Project/Domain Init error",ErrorMsg, MessageBoxButtons.OK);
+                MessageBox.Show(ErrorMsg, "Project/Domain Init error", MessageBoxButtons.OK);
             }
 
 

@@ -11,7 +11,7 @@ Chromes V8 Javascript Engine WITH the ability to access hardware, and other syst
 a plethora of NPM's, Node.js requires users to start/stop via kludgy dos prompts.  
 It (at this point) isn't embeddable into C#/.net apps .. although we're working on that. 
 
-Now I realize that many white-beareded wizard system-admins love command lines. I've personally spent a 
+Now I realize that many white-bearded wizard system-admins love command lines. I've personally spent a 
 great portion of my career in a sys-admin role I've always appreciated how /simply intimidating/ 
 a good ole' command line is --with --lots of --parameters "that aren't always clear". 
 

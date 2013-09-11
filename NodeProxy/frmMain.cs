@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using OpenSSL;
 using OpenSSL.X509;
 using OpenSSL.Crypto;
 using OpenSSL.Core;
@@ -700,8 +701,9 @@ namespace NodeProxy
             if (CreateCert == true)
             {
 
-                
-                var csrDetails = new X509Name();
+
+                var myKey = new X509Request();
+                var csrDetails = new OpenSSL.X509.X509Name();
                 csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
                 csrDetails.Country = "US";
                 csrDetails.StateOrProvince = "Test";
@@ -739,7 +741,6 @@ namespace NodeProxy
 
                 // Here you need CSR(Certificate Signing Request) which you might have already got it from your web server e.g. IIS7.0.
                 // string strCSR = System.IO.File.ReadAllText(@"Path to your CSR file");
-                //FileStream fs = new FileStream(@"C:\Users\Becky\Documents\zoovy\NodeProxy\new_cert.cer", FileMode.Create, FileAccess.ReadWrite);
                 //BinaryWriter bw = new BinaryWriter(fs);
                 OpenSSL.Core.BIO csrbio = OpenSSL.Core.BIO.MemoryBuffer();
                 certSignRequest.Write(csrbio);
@@ -764,7 +765,7 @@ namespace NodeProxy
                 certString = bio.ReadString();
 
                 // opens the key file and appends to the crt to help create the pem file
-                FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.ReadWrite);
+                FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.Read);
                 BinaryReader br = new BinaryReader(fsKey);
                 certString += System.Text.Encoding.ASCII.GetString(br.ReadBytes(Convert.ToInt32(fsKey.Length))); 
                 br.Close();
@@ -780,8 +781,6 @@ namespace NodeProxy
                 // writing to string adds characters
                 bw.Write(System.Text.Encoding.ASCII.GetBytes(certString));
                 bw.Close();
-                fs.Close();
-
             }
          
           }

@@ -42,8 +42,8 @@
             this.btnProxyAddr = new System.Windows.Forms.Button();
             this.btnNodeBrowse = new System.Windows.Forms.Button();
             this.listView1 = new System.Windows.Forms.ListView();
-            this.Domain = new System.Windows.Forms.ColumnHeader();
-            this.ProjectDirectory = new System.Windows.Forms.ColumnHeader();
+            this.Domain = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ProjectDirectory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label3 = new System.Windows.Forms.Label();
             this.btnAddNew = new System.Windows.Forms.Button();
             this.txtNodeLog = new System.Windows.Forms.RichTextBox();
@@ -59,6 +59,7 @@
             this.mnuHelpAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuHelpIndex = new System.Windows.Forms.ToolStripMenuItem();
             this.btnRemove = new System.Windows.Forms.Button();
+            this.startBtn = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -137,7 +138,7 @@
             // 
             this.btnProxyAddr.Location = new System.Drawing.Point(384, 50);
             this.btnProxyAddr.Name = "btnProxyAddr";
-            this.btnProxyAddr.Size = new System.Drawing.Size(75, 23);
+            this.btnProxyAddr.Size = new System.Drawing.Size(69, 23);
             this.btnProxyAddr.TabIndex = 5;
             this.btnProxyAddr.Text = "Select";
             this.btnProxyAddr.UseVisualStyleBackColor = true;
@@ -147,7 +148,7 @@
             // 
             this.btnNodeBrowse.Location = new System.Drawing.Point(384, 16);
             this.btnNodeBrowse.Name = "btnNodeBrowse";
-            this.btnNodeBrowse.Size = new System.Drawing.Size(75, 23);
+            this.btnNodeBrowse.Size = new System.Drawing.Size(69, 23);
             this.btnNodeBrowse.TabIndex = 6;
             this.btnNodeBrowse.Text = "Select";
             this.btnNodeBrowse.UseVisualStyleBackColor = true;
@@ -160,7 +161,7 @@
             this.ProjectDirectory});
             this.listView1.Location = new System.Drawing.Point(13, 63);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(458, 146);
+            this.listView1.Size = new System.Drawing.Size(464, 114);
             this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -186,7 +187,7 @@
             // 
             // btnAddNew
             // 
-            this.btnAddNew.Location = new System.Drawing.Point(315, 215);
+            this.btnAddNew.Location = new System.Drawing.Point(13, 183);
             this.btnAddNew.Name = "btnAddNew";
             this.btnAddNew.Size = new System.Drawing.Size(75, 23);
             this.btnAddNew.TabIndex = 10;
@@ -196,9 +197,9 @@
             // 
             // txtNodeLog
             // 
-            this.txtNodeLog.Location = new System.Drawing.Point(18, 371);
+            this.txtNodeLog.Location = new System.Drawing.Point(13, 371);
             this.txtNodeLog.Name = "txtNodeLog";
-            this.txtNodeLog.Size = new System.Drawing.Size(428, 151);
+            this.txtNodeLog.Size = new System.Drawing.Size(458, 151);
             this.txtNodeLog.TabIndex = 11;
             this.txtNodeLog.Text = "";
             // 
@@ -233,7 +234,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(164, 355);
+            this.label6.Location = new System.Drawing.Point(12, 355);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(59, 13);
             this.label6.TabIndex = 16;
@@ -248,16 +249,17 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.btnNodeBrowse);
             this.groupBox1.Controls.Add(this.btnProxyAddr);
-            this.groupBox1.Location = new System.Drawing.Point(18, 255);
+            this.groupBox1.Location = new System.Drawing.Point(12, 237);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(459, 97);
+            this.groupBox1.Size = new System.Drawing.Size(465, 97);
             this.groupBox1.TabIndex = 17;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Configuration";
+            this.groupBox1.Text = "System Configuration";
+            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // btnLoadLog
             // 
-            this.btnLoadLog.Location = new System.Drawing.Point(456, 405);
+            this.btnLoadLog.Location = new System.Drawing.Point(19, 528);
             this.btnLoadLog.Name = "btnLoadLog";
             this.btnLoadLog.Size = new System.Drawing.Size(69, 25);
             this.btnLoadLog.TabIndex = 18;
@@ -267,7 +269,7 @@
             // 
             // btnClearLog
             // 
-            this.btnClearLog.Location = new System.Drawing.Point(456, 454);
+            this.btnClearLog.Location = new System.Drawing.Point(94, 528);
             this.btnClearLog.Name = "btnClearLog";
             this.btnClearLog.Size = new System.Drawing.Size(69, 25);
             this.btnClearLog.TabIndex = 19;
@@ -281,7 +283,7 @@
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(525, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(488, 24);
             this.menuStrip1.TabIndex = 20;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -297,20 +299,20 @@
             // mnuHelpAbout
             // 
             this.mnuHelpAbout.Name = "mnuHelpAbout";
-            this.mnuHelpAbout.Size = new System.Drawing.Size(152, 22);
+            this.mnuHelpAbout.Size = new System.Drawing.Size(107, 22);
             this.mnuHelpAbout.Text = "About";
             this.mnuHelpAbout.Click += new System.EventHandler(this.mnuHelpAbout_Click);
             // 
             // mnuHelpIndex
             // 
             this.mnuHelpIndex.Name = "mnuHelpIndex";
-            this.mnuHelpIndex.Size = new System.Drawing.Size(152, 22);
+            this.mnuHelpIndex.Size = new System.Drawing.Size(107, 22);
             this.mnuHelpIndex.Text = "Index";
             this.mnuHelpIndex.Click += new System.EventHandler(this.mnuHelpIndex_Click);
             // 
             // btnRemove
             // 
-            this.btnRemove.Location = new System.Drawing.Point(402, 215);
+            this.btnRemove.Location = new System.Drawing.Point(94, 183);
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(75, 23);
             this.btnRemove.TabIndex = 21;
@@ -318,11 +320,22 @@
             this.btnRemove.UseVisualStyleBackColor = true;
             this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
             // 
+            // startBtn
+            // 
+            this.startBtn.Location = new System.Drawing.Point(405, 183);
+            this.startBtn.Name = "startBtn";
+            this.startBtn.Size = new System.Drawing.Size(66, 23);
+            this.startBtn.TabIndex = 22;
+            this.startBtn.Text = "Start";
+            this.startBtn.UseVisualStyleBackColor = true;
+            this.startBtn.Click += new System.EventHandler(this.startBtn_Click);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(525, 534);
+            this.ClientSize = new System.Drawing.Size(488, 555);
+            this.Controls.Add(this.startBtn);
             this.Controls.Add(this.btnRemove);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.label3);
@@ -376,6 +389,7 @@
         private System.Windows.Forms.ToolStripMenuItem mnuHelpAbout;
         private System.Windows.Forms.ToolStripMenuItem mnuHelpIndex;
         private System.Windows.Forms.Button btnRemove;
+        private System.Windows.Forms.Button startBtn;
     }
 }
 

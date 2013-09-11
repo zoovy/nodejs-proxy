@@ -151,6 +151,7 @@ http.createServer(function(req, res) {
 		}
 
 	if (fs.statSync(filename).isDirectory()) filename += '/index.html';
+	console.log("===> "+filename);
 
     fs.readFile(filename, "binary", function(err, file) {
 	if(err) {
@@ -179,6 +180,10 @@ http.createServer(function(req, res) {
 		cert: fs.readFileSync(CERTIFICATE_FILEPATH, 'utf8')
 	}
 };
+	console.log("ROOT_KEY_FILEPATH: "+ROOT_KEY_FILEPATH);
+	console.log("ROOT_KEY_FILEPATH: "+CERTIFICATE_FILEPATH);
+
+
 httpProxy.createServer(localWebserverPort, 'localhost', FAKEHOST_HTTPS_PROXY_options).listen(9002);
  // console.log("HTTPS proxy to static file server running at => http://localhost:9002");
 

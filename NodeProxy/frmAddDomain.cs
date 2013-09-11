@@ -14,6 +14,8 @@ namespace NodeProxy
         public frmAddDomain()
         {
             InitializeComponent();
+            txtDomaiName.Text = "www.zoovy.com";
+            txtProjectDir.Text = "C:\\users\\brian\\documents\\github\\www-zoovy-htdocs";
         }
 
         public string DomainName = "";

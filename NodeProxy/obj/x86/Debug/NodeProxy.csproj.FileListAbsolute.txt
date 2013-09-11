@@ -10,8 +10,11 @@ C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.p
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.exe.CodeAnalysisLog.xml
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.exe.lastcodeanalysissucceeded
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\Nini.dll
-C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\ManagedOpenSsl.xml
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\Nini.pdb
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.exe
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.pdb
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\ManagedOpenSsl.dll
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.csprojResolveAssemblyReference.cache
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\openssl.cnf
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\SelfSignedX509OpenSslNet.exe
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\SelfSignedX509OpenSslNet.pdb

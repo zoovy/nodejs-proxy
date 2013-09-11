@@ -1,0 +1,3 @@
+[submodule "SelfSignedX509OpenSslNet"]
+	path = SelfSignedX509OpenSslNet
+	url = git://github.com/MarvinAlpaca/SelfSignedX509OpenSslNet.git

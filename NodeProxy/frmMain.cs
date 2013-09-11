@@ -71,7 +71,7 @@ namespace NodeProxy
 
         private string ProjectDir;
         private string CertKeyFileName;
-        private string PemFileName;
+        private string PemFilePrefix;
 
         private ContextMenuStrip mnuNodeProxy;
 
@@ -477,11 +477,11 @@ namespace NodeProxy
             bool StartNodeProxy = true;
 
             //string ProjectDir;
-            //string DomainCertKey;
+            //string Domain;
             //string DomainCertFile;
 
             ProjectDir = "./demo";
-            PemFileName = "** PEM FILENAME NOT SET **";
+            PemFilePrefix = "** PEM FILENAME NOT SET **";
 
             // node.exe installation directory can not be blank, checks before continuing         
             if (NodeInstallDir.Length == 0)
@@ -561,7 +561,7 @@ namespace NodeProxy
                 // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
 
                 //CertKeyFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\FakeRoot.key";
-                //PemFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
+                //PemFilePrefix = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
                 // when we are using appPathLoc for testing
                 // strCmdText += " & cd " + appPath;
 
@@ -570,16 +570,16 @@ namespace NodeProxy
                     txtNodeLog.Text = "ERROR: Project " + ProjectDir + " is invalid\n";
                 }
 
-                if (!File.Exists(PemFileName))
+                if (!File.Exists(PemFilePrefix))
                 {
-                    txtNodeLog.Text = "ERROR: PEM File " + PemFileName + " does not exist\n";
+                    txtNodeLog.Text = "ERROR: PEM File " + PemFilePrefix + " does not exist\n";
                 }
 
                 strCmdText += " & node.exe "+appPath+"\\javascript\\nodeproxy.js ";
                 strCmdText += "--domain=" + DomainName;
                 strCmdText += " --rootdir=" + ProjectDir;
-                strCmdText += " --key=" + PemFileName ;
-                strCmdText += " --cert=" + PemFileName ;
+                strCmdText += " --key=" + PemFilePrefix + ".key" ;
+                strCmdText += " --cert=" + PemFilePrefix + ".crt" ;
                 // strCmdText += " --proxy=" + ProxyServer;
                 strCmdText += " \" ";   // terminating "
                 Console.WriteLine(strCmdText);
@@ -736,7 +736,28 @@ namespace NodeProxy
             
         }
 
-       
+        public static CryptoKey CreateNewRSAKey(int numberOfBits)
+        {
+            using (var rsa = new RSA())
+            {
+                BigNumber exponent = 0x10001; // this needs to be a prime number
+                rsa.GenerateKeys(numberOfBits, exponent, null, null);
+
+                return new CryptoKey(rsa);
+            }
+        }
+
+        public X509Request CreateCertificateSigningRequest(X509Name requestDetails)
+        {
+            // using (var requestDetails = GetCertificateSigningRequestSubject())
+            using (var key = CreateNewRSAKey(4096))
+            {
+                int version = 2; // Version 2 is X.509 Version 3
+                return new X509Request(version, requestDetails, key);
+            }
+        }
+
+
 
         private void CreateDomainPEMFile(string domain)
         {
@@ -752,87 +773,175 @@ namespace NodeProxy
 
             if (CreateCert == true)
             {
+                using (var ca = new SelfSignedX509OpenSslNet.CertificateAuthority())
+                {
+                    ca.CreateCryptoKey();
+                    ca.SetupSubjectInformation();
+                    ca.CreateCertificateAuthorityWithExtensions();
 
-                var csrDetails = new OpenSSL.X509.X509Name();
-                csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
-                csrDetails.Country = "US";
-                csrDetails.StateOrProvince = "Test";
-                csrDetails.Organization = "Company " + domain;
-                csrDetails.OrganizationUnit = "** TESTING **";
+                    // Write the CA certificate and it's private key to file so that it can be re-used.
+                    SelfSignedX509OpenSslNet.FileHelpers.WriteCertificateToFileInPemFormat(PemFilePrefix+".ca-crt", ca.CA.Certificate);
+                    SelfSignedX509OpenSslNet.FileHelpers.WritePrivateKeyToFileWithoutPass(ca.Key, PemFilePrefix+".ca-key");
 
-                var signedCert = new X509Request();
+                    using (var csr = new SelfSignedX509OpenSslNet.CertificateSigningRequest())
+                    {
+                        csr.CreateCryptoKey();
+                        csr.SetupSubjectInformation();
+                        csr.CreateCertificateSigningRequest();
 
-                // creates new RSA Key
-                var rsa = new RSA();
-                BigNumber exponent = 0x10001; // this needs to be a prime number
-                rsa.GenerateKeys(4096, exponent, null, null);
-                var rootKey = new CryptoKey(rsa);
+                        // Have the CA process the CSR and issue a certificate that is valid for 1 year.
+                        using (var signedCert = ca.CA.ProcessRequest(csr.Request, DateTime.UtcNow, DateTime.UtcNow.AddYears(1), MessageDigest.SHA512))
+                        {
+                            // Write the new certificate and it's private key to file.
+                            SelfSignedX509OpenSslNet.FileHelpers.WriteCertificateToFileInPemFormat(PemFilePrefix + ".crt", signedCert);
+                            SelfSignedX509OpenSslNet.FileHelpers.WritePrivateKeyToFileWithoutPass(csr.Key, PemFilePrefix + ".key");
 
-                var certSignRequest = new X509Request(2, csrDetails, rootKey);            // Version 2 is X.509 Version 3
-
-                // var myKey = new X509Request();
-                //var myKey = new CryptoKey();
-                //var myPrivateKey = certSignRequest.PEM;
-                //var myCryptoKey = new CryptoKey();
-                //myCryptoKey = CA.CreateNewRSAKey(4096);
-
-                // http://stackoverflow.com/questions/5763313/openssl-net-create-certeficate-509x
-                // ###################################################
-                // Create a configuration object using openssl.cnf file.
-                //Configuration cfg = new OpenSSL.X509.Configuration(@"C:\Users\Becky\Documents\zoovy\NodeProxy\openssl\openssl.cnf");
-                Configuration cfg = new OpenSSL.X509.Configuration(appPath + @"\openssl\openssl.cnf");
-
-                // Create a root certificate authority which will have a self signed certificate.
-                X509CertificateAuthority RootCA = OpenSSL.X509.X509CertificateAuthority.SelfSigned(cfg, new SimpleSerialNumber(), "NodeProxyRoot CA", DateTime.Now, TimeSpan.FromDays(365));
-
-                // If you want the certificate of your root CA which you just create, you can get the certificate like this.
-                X509Certificate RootCertificate = RootCA.Certificate;
-
-
-                // Here you need CSR(Certificate Signing Request) which you might have already got it from your web server e.g. IIS7.0.
-                // string strCSR = System.IO.File.ReadAllText(@"Path to your CSR file");
-                //BinaryWriter bw = new BinaryWriter(fs);
-                OpenSSL.Core.BIO csrbio = OpenSSL.Core.BIO.MemoryBuffer();
-                certSignRequest.Write(csrbio);
-                string strCSR = csrbio.ReadString();
-                csrbio.Dispose();
-                //bw.Write(certString);
-                //bw.Close();
-
-                // You need to write the CSR string to a BIO object as shown below.
-                OpenSSL.Core.BIO ReqBIO = OpenSSL.Core.BIO.MemoryBuffer();
-                ReqBIO.Write(strCSR);
-
-                // Now you can create X509Rquest object using the ReqBIO.
-                OpenSSL.X509.X509Request Request = new OpenSSL.X509.X509Request(ReqBIO);
-
-                // Once you have a request object, you can create a SSL Certificate which is signed by the self signed RootCA.
-                OpenSSL.X509.X509Certificate certificate = RootCA.ProcessRequest(Request, DateTime.Now, DateTime.Now + TimeSpan.FromDays(365 * 10));
-
-                BIO bio = BIO.MemoryBuffer();
-                certificate.Write(bio);
-                string certString;
-                certString = bio.ReadString();
-
-                // opens the key file and appends to the crt to help create the pem file
-                FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.Read);
-                BinaryReader br = new BinaryReader(fsKey);
-                certString += System.Text.Encoding.ASCII.GetString(br.ReadBytes(Convert.ToInt32(fsKey.Length))); 
-                fsKey.Close();
-
-                // Now you can save this certificate to your file system.
-                FileStream fs = new FileStream(PemFileName, FileMode.Create, FileAccess.ReadWrite);
-                //FileStream fs = new FileStream(@"C:\Users\Becky\Documents\zoovy\NodeProxy\" + domain + ".crt", FileMode.Create, FileAccess.ReadWrite);
-                BinaryWriter bw = new BinaryWriter(fs);
-                //bw.Write(certString);
-                // adding ascii coding to write the pem file correctly
-                // must write as arrey of bytes 
-                // writing to string adds characters
-                bw.Write(System.Text.Encoding.ASCII.GetBytes(certString));
-                bw.Close();
+                        }
+                    }
+                }
             }
+        }
+
+        //private void XCreateDomainPEMFile(string domain)
+        //{
+        //    bool CreateCert = true;
+        //    if (String.IsNullOrEmpty(domain))
+        //    {
+        //        Console.WriteLine("Invalid call to CreateDomainPEMFile");
+        //        CreateCert = false;
+        //        var trace = new System.Diagnostics.StackTrace();
+        //    }
+
+        //    CreateCert = LoadDomainFields(domain, true);
+
+        //    if (CreateCert == true)
+        //    {
+
+        //        var csrDetails = new OpenSSL.X509.X509Name();
+        //        csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
+        //        csrDetails.Country = "US";
+        //        csrDetails.Locality = "Locality";
+        //        csrDetails.StateOrProvince = "State";
+        //        csrDetails.Organization = "Company " + domain;
+        //        csrDetails.OrganizationUnit = "** TESTING **";
+        //        csrDetails.Common = domain;
+
+        //        var signedCert = new X509Request();
+
+        //        // creates new RSA Key
+        //        var rsa = new RSA();
+        //        BigNumber exponent = 0x10001; // this needs to be a prime number
+        //        rsa.GenerateKeys(1024, exponent, null, null);
+        //        // var rootKey = new CryptoKey(rsa);
+        //        //var certSignRequest = new X509Request(2, csrDetails, rootKey);            // Version 2 is X.509 Version 3
+
+        //        // var myKey = new X509Request();
+        //        //var myKey = new CryptoKey();
+        //        //var myPrivateKey = certSignRequest.PEM;
+        //        //var myCryptoKey = new CryptoKey();
+        //        //myCryptoKey = CA.CreateNewRSAKey(4096);
+
+        //        // http://marvinalpaca.com/blog/index.php/creating-self-signed-x-509-certificates-using-openssl-net/
+        //        // http://stackoverflow.com/questions/5763313/openssl-net-create-certeficate-509x
+        //        // ###################################################
+        //        // Create a configuration object using openssl.cnf file.
+        //        // Configuration cfg = new OpenSSL.X509.Configuration(@"C:\Users\Becky\Documents\zoovy\NodeProxy\openssl\openssl.cnf");
+        //        // Configuration cfg = new OpenSSL.X509.Configuration(appPath + @"\openssl\openssl.cnf");
+
+        //        // Create a root certificate authority which will have a self signed certificate.
+        //        var extensions = new X509V3ExtensionList();
+        //        extensions.Add(new X509V3ExtensionValue("basicConstraints", true, "CA:TRUE"));
+        //        extensions.Add(new X509V3ExtensionValue("subjectKeyIdentifier", false, "hash"));
+        //        extensions.Add(new X509V3ExtensionValue("authorityKeyIdentifier", false, "keyid:always,issuer:always"));
+        //        var cryptoKey = CreateNewRSAKey(1024);
+        //        // X509CertificateAuthority RootCA = OpenSSL.X509.X509CertificateAuthority.SelfSigned(cfg, new SimpleSerialNumber(), "NodeProxyRoot CA", DateTime.Now, TimeSpan.FromDays(365));
+        //        X509CertificateAuthority RootCA = OpenSSL.X509.X509CertificateAuthority.SelfSigned(
+        //            new SimpleSerialNumber(), 
+        //            cryptoKey, MessageDigest.SHA1, domain, DateTime.UtcNow, TimeSpan.FromDays(365),
+        //            extensions
+        //            );
+
+        //        // If you want the certificate of your root CA which you just create, you can get the certificate like this.
+        //        X509Certificate RootCertificate = RootCA.Certificate;
+
+        //       using (var bio = BIO.File(PemFilePrefix+".root", "w"))
+        //       {
+        //           RootCA.Certificate.Write(bio);
+        //       }
+
+        //        using (var bio = BIO.File(PemFilePrefix+".key", "w"))
+        //       {
+        //           cryptoKey.WritePrivateKey(bio, Cipher.DES_EDE3_CBC, "pass123");
+        //       }
+
+        //        // Here you need CSR(Certificate Signing Request) which you might have already got it from your web server e.g. IIS7.0.
+        //        // string strCSR = System.IO.File.ReadAllText(@"Path to your CSR file");
+        //        //BinaryWriter bw = new BinaryWriter(fs);
+        //        //OpenSSL.Core.BIO csrbio = OpenSSL.Core.BIO.MemoryBuffer();
+        //        //certSignRequest.Write(csrbio);
+        //        //string strCSR = csrbio.ReadString();
+        //        //csrbio.Dispose();
+        //        //bw.Write(certString);
+        //        //bw.Close();
+
+        //        // You need to write the CSR string to a BIO object as shown below.
+        //        // OpenSSL.Core.BIO ReqBIO = OpenSSL.Core.BIO.MemoryBuffer();
+        //        // ReqBIO.Write(strCSR);
+
+        //        // Now you can create X509Rquest object using the ReqBIO.
+        //        // OpenSSL.X509.X509Request Request = new OpenSSL.X509.X509Request(ReqBIO);
+
+        //        // Once you have a request object, you can create a SSL Certificate which is signed by the self signed RootCA.
+        //        // OpenSSL.X509.X509Certificate certificate = RootCA.ProcessRequest(Request, DateTime.Now, DateTime.Now + TimeSpan.FromDays(365 * 10));
+
+        //        // 
+        //        //  LETS SIGN THIS 
+        //        // 
+        //        OpenSSL.X509.X509Certificate certificate = RootCA.ProcessRequest(
+        //            CreateCertificateSigningRequest(csrDetails), 
+        //             DateTime.UtcNow, DateTime.UtcNow.AddYears(1), MessageDigest.SHA1);
+
+
+
+
+        //        //BIO bio = BIO.MemoryBuffer();
+        //        //certificate.Write(bio);
+        //        //string certString;
+        //        //certString = bio.ReadString();
+
+        //        using (var bio = BIO.File(PemFilePrefix+".csr", "w"))
+        //        {
+        //            signedCert.Write(bio);
+        //        }
+
+        //        using (var bio = BIO.File(PemFilePrefix + ".crt", "w"))
+        //        {
+        //            certificate.Write(bio);
+        //        }
+
+
+        //        SelfSignedX509OpenSslNet.FileHelpers.WritePrivateKeyToFileWithoutPass(cryptoKey,PemFilePrefix+".key");
+
+        //        // opens the key file and appends to the crt to help create the pem file
+        //        //FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.Read);
+        //        //BinaryReader br = new BinaryReader(fsKey);
+        //        //certString += System.Text.Encoding.ASCII.GetString(br.ReadBytes(Convert.ToInt32(fsKey.Length))); 
+        //        //fsKey.Close();
+        //        //certString += "\n\n";
+
+        //        // Now you can save this certificate to your file system.
+        //        //FileStream fs = new FileStream(PemFilePrefix, FileMode.Create, FileAccess.ReadWrite);
+        //        //FileStream fs = new FileStream(@"C:\Users\Becky\Documents\zoovy\NodeProxy\" + domain + ".crt", FileMode.Create, FileAccess.ReadWrite);
+        //        //BinaryWriter bw = new BinaryWriter(fs);
+        //        //bw.Write(certString);
+        //        // adding ascii coding to write the pem file correctly
+        //        // must write as arrey of bytes 
+        //        // writing to string adds characters
+        //        //bw.Write(System.Text.Encoding.ASCII.GetBytes(certString));
+        //        //bw.Close();
+        //    }
          
-          }
+        //  }
 
        
 
@@ -844,7 +953,7 @@ namespace NodeProxy
         private bool LoadDomainFields(string DomainName, bool createpem)
         {
             ProjectDir = "";
-            PemFileName = "";
+            PemFilePrefix = "";
 
 
             string DomainINIKey = "";
@@ -888,7 +997,7 @@ namespace NodeProxy
             if (ErrorMsg == "") {
                 // grabs the variables - projectdir, key, cert from ini file
                 ProjectDir = ProxyIni.Configs[DomainINIKey].Get(ProjectDirKey);
-                PemFileName = ProjectDir + @"\" + DomainName + ".pem";
+                PemFilePrefix = ProjectDir + @"\" + DomainName;
                 if (ProjectDir == "")
                 {
                     ErrorMsg = "Please specify a valid Project Directory";
@@ -900,8 +1009,8 @@ namespace NodeProxy
                 else if (createpem) {
                     // we'll create a pem file so don't worry about it.
                 }
-                else if (! Directory.Exists(PemFileName)) {
-                    // txtNodeLog += PemFileName+ " doesn't exist, creating.";
+                else if (! Directory.Exists(PemFilePrefix)) {
+                    // txtNodeLog += PemFilePrefix+ " doesn't exist, creating.";
                     createpem = true;
                 }
             }
@@ -1261,14 +1370,13 @@ namespace NodeProxy
             if (sel.Count == 1)
             {
                 ListViewItem selItem = listView1.Items[sel[0]];
-                domain  = selItem.SubItems[0].Text;
+                domain = selItem.SubItems[0].Text;
 
-                if (MessageBox.Show("Do you want to remove domain:" + domain , "Remove Domain", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                if (MessageBox.Show("Do you want to remove domain:" + domain, "Remove Domain", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     // removes the domain for the ini and listview 
                     RemoveDomain(domain);
                 }
-               
             }
         }
 
@@ -1277,6 +1385,23 @@ namespace NodeProxy
         {
             frmAbout AboutFrm = new frmAbout();
             AboutFrm.ShowDialog(); 
+        }
+
+        private void startBtn_Click(object sender, EventArgs e)
+        {
+            string domain;
+            ListView.SelectedIndexCollection sel = listView1.SelectedIndices;
+            if (sel.Count == 1)
+            {
+                ListViewItem selItem = listView1.Items[sel[0]];
+                domain = selItem.SubItems[0].Text;
+                NodeProxyStart(domain);
+            }
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
         }
 
        

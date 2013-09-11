@@ -92,6 +92,12 @@ namespace NodeProxy
         private void frmMain_Load(object sender, EventArgs e)
         {
             appPath = Path.GetDirectoryName(Application.ExecutablePath);
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                // running debugger
+                Console.WriteLine("Detected Debugger - modifying AppPath\n");
+                appPath += "\\..\\..\\..\\..";
+            }
 
             //AppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             //AppDataDir += "\\CommerceRack";
@@ -809,76 +815,72 @@ namespace NodeProxy
         //
         private bool LoadDomainFields(string DomainName, bool createpem)
         {
-            bool DomainFieldsSucess = true;
-
             ProjectDir = "";
             PemFileName = "";
 
 
-            if (DomainsHash.ContainsKey(DomainName) == true)
+            string DKey = "";
+            var ErrorMsg = "";
+
+            if (DomainsHash.ContainsKey(DomainName) == false)
             {
-               
-                string DKey;
+                ErrorMsg = "Domain Key was not found. Domain: " + DomainName;
+            }
+            else 
+            {
                 DKey = DomainsHash[DomainName].ToString();
-                if (DKey.Length > 0)
-                {
-                    IConfig DomainConfig = ProxyIni.Configs[DKey];
-                    if (DomainConfig == null)
-                    {
-                        // key is not in the ini file
-                        DomainFieldsSucess = false;
-                    }
-                    // grabs the variables - projectdir, key, cert from ini file
-                    ProjectDir = ProxyIni.Configs[DKey].Get(ProjectDirKey);
-                    if ((Directory.Exists(ProjectDir) == true) && (DomainFieldsSucess == true))
-                    {
-                        CertKeyFileName = appPath + @"\openssl\\FakeRoot.key";
-                        if (File.Exists(CertKeyFileName) == true)
-                        {
-                            PemFileName = ProjectDir + @"\" + DomainName + ".pem";
-                            if ((File.Exists(CertKeyFileName) == false) && (createpem == false))
-                            {
-                                // certificate does not exist - so can not load the necessary info to start the proxy
-                                MessageBox.Show("Certificate does not exist: " + PemFileName,
-                                   "Certificate does not exist", MessageBoxButtons.OK);
-                                DomainFieldsSucess = false;
-                            }
-                        }
-                        else
-                        {
-                            // did not the cert key - so can not load the necessary info to start the proxy
-                            MessageBox.Show("Certificate key does not exist: " + CertKeyFileName,
-                               "Certificate key does not exist", MessageBoxButtons.OK);
-                            DomainFieldsSucess = false;
-                        }
-
-                    }
-                    else
-                    {
-                        // did not found project directory - so can not load the necessary info to start the proxy
-                        MessageBox.Show("Project directory does not exist: " + ProjectDir,
-                           "project directory does not exist", MessageBoxButtons.OK);
-                        DomainFieldsSucess = false;
-                    }
-                }
-                else
-                {
-                    // domain key was blank - so can not load the necessary info to start the proxy
-                    MessageBox.Show("Domain Key was blank. Can not load information for domain: " + DomainName,
-                       "Domain Key was blank", MessageBoxButtons.OK);
-                    DomainFieldsSucess = false;
-
-                }
-            }
-            else
-            {
-                // did not found domain key - so can not load the necessary info to start the proxy
-                MessageBox.Show("Domain Key was not found. Domain: " + DomainName,
-                   "Domain Key Not Found", MessageBoxButtons.OK);
-                DomainFieldsSucess = false;
+                if (DKey.Length == 0) {
+                   ErrorMsg = "Domain Key was blank. Can not load information for domain: " + DomainName;
+                   }
             }
 
-            return DomainFieldsSucess;
+
+            IConfig DomainConfig;
+
+            if (ErrorMsg != "") {
+                // shit happened
+            }
+            else {
+                // sanity: DKey *MUST BE* set and valid
+                DomainConfig = ProxyIni.Configs[DKey];
+                if (DomainConfig == null)
+                {
+                    ErrorMsg = "Alas, it appears "+DKey.ToString()+" is not defined in ProxyConfig.Ini\n";
+                }
+            }
+
+            if (ErrorMsg == "") {
+               if (File.Exists(CertKeyFileName) == true) {
+                   ErrorMsg = "Missing "+CertKeyFileName;
+               }
+            }
+
+
+            
+            if (ErrorMsg == "") {
+                // grabs the variables - projectdir, key, cert from ini file
+                ProjectDir = ProxyIni.Configs[DKey].Get(ProjectDirKey);
+                PemFileName = ProjectDir + @"\" + DomainName + ".pem";
+                if ((Directory.Exists(ProjectDir) == false))
+                {
+                   ErrorMsg = "ProjectDir "+ProjectDir+" does not exist";
+                }
+                else if (createpem) {
+                    // we'll create a pem file so don't worry about it.
+                }
+                else if (! Directory.Exists(PemFileName)) {
+                    // txtNodeLog += PemFileName+ " doesn't exist, creating.";
+                    createpem = true;
+                }
+            }
+
+            if (ErrorMsg != "") {
+                // txtNodeLog += "ERROR: "+ErrorMsg+"\n";
+                MessageBox.Show("Project/Domain Init error",ErrorMsg, MessageBoxButtons.OK);
+            }
+
+
+            return (ErrorMsg == "");
         }
 
         // Brings up an open dialog for finding the location of node.exe

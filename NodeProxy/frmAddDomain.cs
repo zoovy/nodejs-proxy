@@ -16,8 +16,8 @@ namespace NodeProxy
             InitializeComponent();
         }
 
-        public string DomainName;
-        public string ProjectDir;
+        public string DomainName = "";
+        public string ProjectDir = "";
 
         // btnAdd - Triggers DialogResult.OK
         //
@@ -45,11 +45,12 @@ namespace NodeProxy
             //ProjectFolderDialog.RootFolder = Environment.SpecialFolder.MyDocuments;
             // instead use the SelectedPath to set the start folder in folder dialog
 
-            ProjectFolderDialog.SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
+            folderPath = Environment.SpecialFolder.MyDocuments.ToString();
+            ProjectFolderDialog.SelectedPath = folderPath;
+        
             if (ProjectFolderDialog.ShowDialog() == DialogResult.OK)
             {
-                folderPath = ProjectFolderDialog.SelectedPath;
+                folderPath = ProjectFolderDialog.SelectedPath.ToString();
                  
                 // displays folder was chosen to the user
                 txtProjectDir.Text = folderPath; 

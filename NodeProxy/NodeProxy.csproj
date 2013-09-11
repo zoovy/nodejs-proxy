@@ -80,10 +80,12 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ManagedOpenSsl">
+    <Reference Include="ManagedOpenSsl, Version=0.6.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\openssl\openssl-net-0.5\ManagedOpenSsl.dll</HintPath>
     </Reference>
-    <Reference Include="Nini">
+    <Reference Include="Nini, Version=1.1.0.0, Culture=neutral, PublicKeyToken=691faec150a7fa7b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Nini-1.10\Bin\DotNet\2.0\Debug\Nini.dll</HintPath>
     </Reference>
     <Reference Include="System" />

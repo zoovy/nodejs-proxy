@@ -1,4 +1,3 @@
-C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.csprojResolveAssemblyReference.cache
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.frmAbout.resources
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.frmMain.resources
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.frmAddDomain.resources
@@ -10,9 +9,9 @@ C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.e
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.pdb
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.exe.CodeAnalysisLog.xml
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\NodeProxy.exe.lastcodeanalysissucceeded
-C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\ManagedOpenSsl.dll
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\Nini.dll
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\ManagedOpenSsl.xml
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\bin\x86\Debug\Nini.pdb
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.exe
 C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.pdb
+C:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy\obj\x86\Debug\NodeProxy.csprojResolveAssemblyReference.cache

@@ -10,19 +10,12 @@
        <Types>
         <Type Name="frmMain" Kind="Class" Accessibility="Public" ExternallyVisible="True">
          <Members>
-          <Member Name="#CreateDomainCrt(System.String)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
-           <Messages>
-            <Message TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202" Status="Active" Created="2013-09-11 01:58:26Z" FixCategory="DependsOnFix">
-             <Issue Certainty="75" Level="Warning" Path="c:\Users\brian\Documents\GitHub\nodejs-proxy\NodeProxy" File="frmMain.cs" Line="794">Object 'fsKey' can be disposed more than once in method 'frmMain.CreateDomainCrt(string)'. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 794</Issue>
-            </Message>
-           </Messages>
-          </Member>
           <Member Name="#InternetSetOption(System.IntPtr,System.Int32,System.IntPtr,System.Int32)" Kind="Method" Static="True" Accessibility="Public" ExternallyVisible="True">
            <Messages>
-            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2013-09-11 01:58:26Z" FixCategory="Breaking">
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2013-09-11 03:28:20Z" FixCategory="Breaking">
              <Issue Certainty="95" Level="CriticalWarning">Because it is a P/Invoke method, 'frmMain.InternetSetOption(IntPtr, int, IntPtr, int)' should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Issue>
             </Message>
-            <Message TypeName="PInvokesShouldNotBeVisible" Category="Microsoft.Interoperability" CheckId="CA1401" Status="Active" Created="2013-09-11 01:58:26Z" FixCategory="Breaking">
+            <Message TypeName="PInvokesShouldNotBeVisible" Category="Microsoft.Interoperability" CheckId="CA1401" Status="Active" Created="2013-09-11 03:28:20Z" FixCategory="Breaking">
              <Issue Certainty="50" Level="CriticalError">Change the accessibility of P/Invoke 'frmMain.InternetSetOption(IntPtr, int, IntPtr, int)' so that it is no longer visible from outside its assembly.</Issue>
             </Message>
            </Messages>
@@ -37,16 +30,6 @@
   </Target>
  </Targets>
  <Rules>
-  <Rule TypeName="Do not dispose objects multiple times" Category="Microsoft.Usage" CheckId="CA2202">
-   <Name>Do not dispose objects multiple times</Name>
-   <Description>A correctly implemented Dispose method can be called multiple times without throwing an exception. However, this is not guaranteed and to avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.</Description>
-   <Resolution Name="Default">Object {0} can be disposed more than once in method {1}. To avoid generating a System.ObjectDisposedException you should not call Dispose more than one time on an object.: Lines: 794</Resolution>
-   <Owner>RuleOwner</Owner>
-   <Url>http://msdn.microsoft.com/library/ms182334(VS.100).aspx</Url>
-   <Email />
-   <MessageLevel Certainty="75">Warning</MessageLevel>
-   <File Name="dataflowrules.dll" Version="11.0.0.0" />
-  </Rule>
   <Rule TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060">
    <Name>Move P/Invokes to NativeMethods class</Name>
    <Description>This type contains members with the DllImport attribute. Members with the DllImport attribute should be contained in classes named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Description>

@@ -42,7 +42,6 @@ namespace NodeProxy
 
         static System.Diagnostics.Process CMDprocess;
         static System.Diagnostics.ProcessStartInfo startInfo;
-        private static bool processDone = false;
         string appPath;
 
         // Name of the ini file that will be installed in the app.exe location
@@ -132,6 +131,24 @@ namespace NodeProxy
             string DomainCfgs = "";
 
             // Load the configuration ProxyIni file
+            if (! File.Exists(AppDataDir + ProxyIniFileName)) {
+                // http://sourceforge.net/p/nini/bugs/32/
+                // If you create an instance of the IniWriter class
+                // through a class that does not have a BaseStream
+                // property then Nini will throw an exception on the
+                // Dispose call.
+
+                var NL = Environment.NewLine;
+                string toWrite = ";debug" + NL
+                    + "[" + MainIniConfig + "]" + NL;
+                System.IO.File.WriteAllText(AppDataDir + ProxyIniFileName, toWrite);
+                
+                txtNodeLog.Text += AppDataDir + ProxyIniFileName + "not found, creating one.\n";
+
+                // next we'll reload ProxyIni because NINI module doesn't let us specify where 
+                //  .save() method saves to unless it is initialized from a file.         
+            }
+
 
 
             if (File.Exists(AppDataDir + ProxyIniFileName) == true)
@@ -147,21 +164,6 @@ namespace NodeProxy
                 NodeProxyAddress = ProxyIni.Configs[MainIniConfig].Get(NodeProxyAddrKey);
                 AutoEnableStr = ProxyIni.Configs[MainIniConfig].Get(AutoProxyKey);
                 DomainCfgs = ProxyIni.Configs[MainIniConfig].Get(DomainCfgsKey);
-            }
-            else
-            {
-                ProxyIni = new IniConfigSource();
-                ProxyIni.Configs.Add(MainIniConfig);
-                txtNodeLog.Text += AppDataDir + ProxyIniFileName + "not found, creating one.\n";
-
-                // System.IO.File.WriteAllLines(AppDataDir+ProxyIniFileName, );
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(AppDataDir + ProxyIniFileName, true))
-                {
-                    file.WriteLine(ProxyIni.ToString());
-                }
-                // reload ProxyIni because NINI module doesn't let us specify where 
-                //  .save() method saves to unless it is initialized from a file.
-                ProxyIni = new IniConfigSource(AppDataDir + ProxyIniFileName);
             }
 
             if ((NodeProxyAddress == null) || (NodeProxyAddress.Length == 0)) {
@@ -213,15 +215,13 @@ namespace NodeProxy
 
             // add the domains into list by splitting the string using comma as delimeter
             // used for loading the domains into the grid on the form and adding to menu in the system tray
-            if (!String.IsNullOrEmpty(DomainCfgs))
+            if (String.IsNullOrEmpty(DomainCfgs))
             {
-                DomainKeys = DomainCfgs.Split(',').ToList<string>();
-            }
-            else
-            {
+                // make sure DomainCfgs is initialized to BLANK here else bad things happen later
                 DomainCfgs = "";
             }
-  
+            DomainKeys = DomainCfgs.Split(',').ToList<string>();
+            // SANITY: at this point DomainCfgs and DomainKeys are both initialized.
         }
 
         private void LoadDomains()
@@ -512,9 +512,6 @@ namespace NodeProxy
             if (StartNodeProxy == true)
             {
 
-                string NodeBat;
-                NodeBat = "nodevars.bat";
-
                 string appPathLoc;
                 // hard code appPath because several directories 
                 // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
@@ -561,6 +558,7 @@ namespace NodeProxy
                 strCmdText += " --key=" + PemFileName ;
                 strCmdText += " --cert=" + PemFileName ;
                 Console.WriteLine(strCmdText);
+                txtNodeLog.Text += strCmdText + "\n";
 
 
 
@@ -707,7 +705,6 @@ namespace NodeProxy
                 //CMDprocess.OutputDataReceived -= new DataReceivedEventHandler(xOnOutputDataReceived);
                 //CMDprocess.ErrorDataReceived -= new DataReceivedEventHandler(OnErrorDataReceived);
                 CMDprocess.Exited -= new EventHandler(OnCmdExited);
-                processDone = true;
             }
 
 
@@ -716,9 +713,15 @@ namespace NodeProxy
 
        
 
-        private void CreateDomainCrt(string domain)
+        private void CreateDomainPEMFile(string domain)
         {
             bool CreateCert = true;
+            if (String.IsNullOrEmpty(domain))
+            {
+                Console.WriteLine("Invalid call to CreateDomainPEMFile");
+                CreateCert = false;
+                var trace = new System.Diagnostics.StackTrace();
+            }
 
             CreateCert = LoadDomainFields(domain, true);
 
@@ -790,7 +793,6 @@ namespace NodeProxy
                 FileStream fsKey = new FileStream(CertKeyFileName , FileMode.Open, FileAccess.Read);
                 BinaryReader br = new BinaryReader(fsKey);
                 certString += System.Text.Encoding.ASCII.GetString(br.ReadBytes(Convert.ToInt32(fsKey.Length))); 
-                br.Close();
                 fsKey.Close();
 
                 // Now you can save this certificate to your file system.
@@ -820,7 +822,7 @@ namespace NodeProxy
             PemFileName = "";
 
 
-            string DKey = "";
+            string DomainINIKey = "";
             var ErrorMsg = "";
 
             if (DomainsHash.ContainsKey(DomainName) == false)
@@ -829,8 +831,8 @@ namespace NodeProxy
             }
             else 
             {
-                DKey = DomainsHash[DomainName].ToString();
-                if (DKey.Length == 0) {
+                DomainINIKey = DomainsHash[DomainName].ToString();
+                if (DomainINIKey.Length == 0) {
                    ErrorMsg = "Domain Key was blank. Can not load information for domain: " + DomainName;
                    }
             }
@@ -842,11 +844,11 @@ namespace NodeProxy
                 // shit happened
             }
             else {
-                // sanity: DKey *MUST BE* set and valid
-                DomainConfig = ProxyIni.Configs[DKey];
+                // sanity: DomainINIKey *MUST BE* set and valid
+                DomainConfig = ProxyIni.Configs[DomainINIKey];
                 if (DomainConfig == null)
                 {
-                    ErrorMsg = "Alas, it appears "+DKey.ToString()+" is not defined in ProxyConfig.Ini\n";
+                    ErrorMsg = "Alas, it appears "+DomainINIKey.ToString()+" is not defined in ProxyConfig.Ini\n";
                 }
             }
 
@@ -860,7 +862,7 @@ namespace NodeProxy
             
             if (ErrorMsg == "") {
                 // grabs the variables - projectdir, key, cert from ini file
-                ProjectDir = ProxyIni.Configs[DKey].Get(ProjectDirKey);
+                ProjectDir = ProxyIni.Configs[DomainINIKey].Get(ProjectDirKey);
                 PemFileName = ProjectDir + @"\" + DomainName + ".pem";
                 if (ProjectDir == "")
                 {
@@ -879,7 +881,8 @@ namespace NodeProxy
                 }
             }
 
-            if (ErrorMsg != "") {
+            if (ErrorMsg != "")
+            {
                 // txtNodeLog += "ERROR: "+ErrorMsg+"\n";
                 MessageBox.Show(ErrorMsg, "Project/Domain Init error", MessageBoxButtons.OK);
             }
@@ -1007,23 +1010,82 @@ namespace NodeProxy
         //      e. saves the certificate and key name to ini file (dont think we need to do this since the cert and key will be in the project directoy
         private void btnAddNew_Click(object sender, EventArgs e)
         {
-            string Domain;
-            string PrjDir;
-            string Dkey;
+            string Domain = "";
+            string PrjDir = "";
+            string DomainINIKey;
 
             string DConfigs;
+            string ErrorMsg = "";
 
             DConfigs = "";
 
             frmAddDomain AddDomainFrm = new frmAddDomain();
-            if (AddDomainFrm.ShowDialog() == DialogResult.OK)
+            if (AddDomainFrm.ShowDialog() != DialogResult.OK)
             {
-                // gets the information that set in AddDomainFrm
+                ErrorMsg = "NO_PROBLEMS"; // not really an error
+            }
+            else
+            {
+                // Validates the addDomainFrm
                 Domain = AddDomainFrm.DomainName;
+                if (Domain == "")
+                {
+                    ErrorMsg = "domain is required";
+                }
+                else if (Domain == "www.domain.com")
+                {
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                       // www.domain.com is valid in the debugger.
+                    }
+                    else
+                    {
+                        ErrorMsg = "Please specify a real domain (www.domain.com is invalid)";
+                    }
+                }
                 PrjDir = AddDomainFrm.ProjectDir;
+                if (PrjDir == "")
+                {
+                    ErrorMsg = "Project Directory is required";
+                }
+                else if (!Directory.Exists(PrjDir))
+                {
+                    ErrorMsg = "Project Directory is invalid";
+                }
+            }
 
-                // generates a new domain key for the ini file
-                Dkey = NewDomainKey();
+            if (ErrorMsg == "") {
+               // generates a new domain key for the ini file
+                // finds the next available key to use in the ini file
+                int DCnt;
+                DomainINIKey = "";
+                DCnt = 0;
+
+                if ((DomainKeys == null) || (DomainKeys.Count==0)) 
+                {
+                    // first domain be added - so need to initalize the string list;
+                    DomainINIKey = "d1";
+                    DomainKeys = new List<string>();
+                }
+                else
+                {
+                    // creates at starting key as d + count
+                    //
+                    // future - possible feature - add a domain nickname for testing
+                    // then it will use the domina nick name instead
+                    DCnt = DomainKeys.Count;
+                    DomainINIKey = "d" + DCnt.ToString();
+
+                    while (DomainKeys.Contains(DomainINIKey))
+                    {
+                        // checks to see if the key exists, increments by one until a key is not found
+                        DCnt += 1;
+                        DomainINIKey = "d" + DCnt.ToString();
+                    }
+                }
+
+                // add the new key to the string list
+                DomainKeys.Add(DomainINIKey);
 
                 // updates the DomainConfigs list 
                 // the list is saved comma seperate
@@ -1045,61 +1107,36 @@ namespace NodeProxy
                 ProxyIni.Configs[MainIniConfig].Set(DomainCfgsKey, DConfigs);
 
                 // Adds the new key for domain to ini
-                ProxyIni.AddConfig(Dkey);
+                ProxyIni.AddConfig(DomainINIKey);
 
                 // adds domain and the project directory to the ini using the new domain ket
-                ProxyIni.Configs[Dkey].Set(DomainKey , Domain );
-                ProxyIni.Configs[Dkey].Set(ProjectDirKey, PrjDir);
+                ProxyIni.Configs[DomainINIKey].Set(DomainKey , Domain );
+                ProxyIni.Configs[DomainINIKey].Set(ProjectDirKey, PrjDir);
 
                 // saves the ini file before we begin the next step
-
                 ProxyIni.Save();
 
                 // refreshes the list view and loads the domains
                 LoadDomains();
 
-                // create certificate 
-                CreateDomainCrt(Domain);                
+                // create certificate Pem File in project dir.
+                CreateDomainPEMFile(Domain);                
             }
+
+            if (ErrorMsg == "")
+            {
+            }
+            else if (ErrorMsg == "NO_PROBLEMS")
+            {
+                // a cheap short circuit.
+            }
+            else {
+                // txtNodeLog += "ERROR: "+ErrorMsg+"\n";
+                MessageBox.Show(ErrorMsg, "Project/Domain Init error", MessageBoxButtons.OK);
+            }
+
         }
 
-        // NewDomainKey - finds the next available key to use in the ini file
-        private string NewDomainKey()
-        {
-            string DKey;
-            int DCnt;
-            DKey = "";
-            DCnt = 0;
-
-            if (DomainKeys == null)
-            {
-                // first domain be added - so need to initalize the string list;
-                DKey = "d1";
-                DomainKeys = new List<string>();
-                
-            }
-            else
-            {
-                // creates at starting key as d + count
-                //
-                // future - possible feature - add a domain nickname for testing
-                // then it will use the domina nick name instead
-                DCnt = DomainKeys.Count; 
-                DKey = "d" + DCnt.ToString();
-
-                while (DomainKeys.Contains(DKey))
-                {
-                    // checks to see if the key exists, increments by one until a key is not found
-                    DCnt += 1;
-                    DKey = "d" + DCnt.ToString();
-                }
-            }
-
-            // add the new key to the string list
-            DomainKeys.Add(DKey); 
-
-            return DKey;
-        }
 
         // loads the form
         private void btnProxyAddr_Click(object sender, EventArgs e)
@@ -1136,11 +1173,11 @@ namespace NodeProxy
             if (DomainsHash.ContainsKey(domain) == true)
             {
                 // removes the fields and config header from the ini file
-                string DKey;
-                DKey = DomainsHash[domain ].ToString();
-                if (DKey.Length > 0)
+                string DomainINIKey;
+                DomainINIKey = DomainsHash[domain ].ToString();
+                if (DomainINIKey.Length > 0)
                 {
-                    IConfig DomainConfig = ProxyIni.Configs[DKey];
+                    IConfig DomainConfig = ProxyIni.Configs[DomainINIKey];
                     if (DomainConfig != null)
                     {
                         DomainConfig.Remove(ProjectDirKey);
@@ -1153,7 +1190,7 @@ namespace NodeProxy
                 if (DomainKeys != null)
                 {
                     // removes the key from the list
-                    DomainKeys.Remove(DKey);
+                    DomainKeys.Remove(DomainINIKey);
 
                     // updates the DomainConfigs list 
                     // the list is saved comma seperate

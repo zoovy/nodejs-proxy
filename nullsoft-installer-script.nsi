@@ -2,6 +2,8 @@
 ;Basic Example Script
 ;Written by Joost Verburg
 
+; http://www.microsoft.com/en-us/download/details.aspx?id=8328
+
 ;--------------------------------
 ;Include Modern UI
 

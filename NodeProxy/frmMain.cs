@@ -146,8 +146,16 @@ namespace NodeProxy
             {
                 ProxyIni = new IniConfigSource();
                 ProxyIni.Configs.Add(MainIniConfig);
-                txtNodeLog.Text += AppDataDir + ProxyIniFileName + "not found.\n";
+                txtNodeLog.Text += AppDataDir + ProxyIniFileName + "not found, creating one.\n";
 
+                // System.IO.File.WriteAllLines(AppDataDir+ProxyIniFileName, );
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(AppDataDir + ProxyIniFileName, true))
+                {
+                    file.WriteLine(ProxyIni.ToString());
+                }
+                // reload ProxyIni because NINI module doesn't let us specify where 
+                //  .save() method saves to unless it is initialized from a file.
+                ProxyIni = new IniConfigSource(AppDataDir + ProxyIniFileName);
             }
 
             if ((NodeProxyAddress == null) || (NodeProxyAddress.Length == 0)) {
@@ -175,6 +183,7 @@ namespace NodeProxy
             if (NodeInstallDir.Length == 0)
             {
                     // warn the user node isn't installed and they're going to have a bad time.
+                txtNodeLog.Text += "No Node.js == You're going to have a bad time (please download and install it)\n";
             }
 
 
@@ -191,9 +200,13 @@ namespace NodeProxy
 
             // add the domains into list by splitting the string using comma as delimeter
             // used for loading the domains into the grid on the form and adding to menu in the system tray
-            if (DomainCfgs != "")
+            if (!String.IsNullOrEmpty(DomainCfgs))
             {
                 DomainKeys = DomainCfgs.Split(',').ToList<string>();
+            }
+            else
+            {
+                DomainCfgs = "";
             }
   
         }
@@ -701,8 +714,6 @@ namespace NodeProxy
             if (CreateCert == true)
             {
 
-
-                var myKey = new X509Request();
                 var csrDetails = new OpenSSL.X509.X509Name();
                 csrDetails.Common = domain;         // this MUST be the server fully qualified hostname+domain
                 csrDetails.Country = "US";
@@ -816,7 +827,7 @@ namespace NodeProxy
                     ProjectDir = ProxyIni.Configs[DKey].Get(ProjectDirKey);
                     if ((Directory.Exists(ProjectDir) == true) && (DomainFieldsSucess == true))
                     {
-                        CertKeyFileName = appPath + @"\openssl\\FakeRoot.key" ;
+                        CertKeyFileName = appPath + @"\openssl\\FakeRoot.key";
                         if (File.Exists(CertKeyFileName) == true)
                         {
                             PemFileName = ProjectDir + @"\" + DomainName + ".pem";
@@ -1027,11 +1038,7 @@ namespace NodeProxy
 
                 // saves the ini file before we begin the next step
 
-                // System.IO.File.WriteAllLines(AppDataDir+ProxyIniFileName, );
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(AppDataDir+ProxyIniFileName, true))
-                {
-                    file.WriteLine(ProxyIni.ToString());
-                }
+                ProxyIni.Save();
 
                 // refreshes the list view and loads the domains
                 LoadDomains();

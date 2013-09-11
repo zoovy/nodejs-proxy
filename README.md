@@ -4,7 +4,8 @@ nodejs-proxy
 A system tray management utility for starting stopping node.js scripts.
 Packaged with nodeproxy.js a utility for single-page app developers. 
 
-== RATIONALE ==
+RATIONALE
+===
 Node.js is a pretty f*cking amazing programming environment, but despite having full windows support of
 Chromes V8 and ability to access hardware, and other system resources filesystem NPM's, 
 it requires users to start/stop via arcane dos prompts.  It (at this point) isn't embeddable into C#/.net
@@ -22,13 +23,15 @@ in the oddest freaking locations which ALWAYS seem to include spaces.  As a Linu
 line I find this alien landscape frightening. The goal of this is to bring the power of Node.js to end users
 running Win7/8/Vista and teach more web-developers to use Git.  (Both things I consider to be noble causes)
 
-== LONG TERM GOALS == 
+LONG TERM GOALS
+===
 So Long term this will be a utility for starting and stopping multiple node.js scripts as windows services.
 Node.js is just a fast easy way to write JS software that runs on windows, mac, linux/unix, android, ios (sorta).
 Distributed with multiple node.js scripts for doing a variety of interesting things (not just creating 
 webservers and proxies). 
 
-== SHORT TERM GOALS ==
+SHORT TERM GOALS: NodeProxy.Js
+===
 
 Short term nodejs-proxy comes with one node.js script called "nodeproxy.js"
 * a utility for testing single page html apps that need to make REST API calls to a backend before
@@ -58,3 +61,10 @@ It also lets web developers enjoy the full power of git for change/tracking mana
 in the kernel/utility/perl development communities for such a long time.
 
 Enjoy!
+
+===
+
+Credits:
+* http://nini.sourceforge.net/
+* https://github.com/MarvinAlpaca/SelfSignedX509OpenSslNet
+* http://www.openssl.org/

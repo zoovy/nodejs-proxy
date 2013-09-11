@@ -6,22 +6,26 @@ Packaged with nodeproxy.js a utility for single-page app developers.
 
 RATIONALE
 ===
-Node.js is a pretty f*cking amazing programming environment, but despite having full windows support of
-Chromes V8 and ability to access hardware, and other system resources filesystem NPM's, 
-it requires users to start/stop via arcane dos prompts.  It (at this point) isn't embeddable into C#/.net
-apps .. although we're working on that. 
+Node.js is a pretty f*cking amazing programming environment.  BUT Despite having full support of
+Chromes V8 Javascript Engine WITH the ability to access hardware, and other system resources filesystem via 
+a plethora of NPM's, Node.js requires users to start/stop via kludgy dos prompts.  
+It (at this point) isn't embeddable into C#/.net apps .. although we're working on that. 
 
-Now I realize that white-beareded wizard system-admins love command lines, and considering I've spent a 
-good portion of my career in that role I've always appreciated how /simply intimidating/ they are. 
+Now I realize that many white-beareded wizard system-admins love command lines. I've personally spent a 
+great portion of my career in a sys-admin role I've always appreciated how /simply intimidating/ 
+a good ole' command line is --with --lots of --parameters "that aren't always clear". 
 
-Old-school DOS directory navigation and command lines scare the piss out of web-developers and end-users.
-But command lines in Windows are obtuse. Hell, command lines in any environment which allows spaces with
-tab based command completion is just dancing with the devil as far as I'm concerned.
-The programmer side of appreciates why "My Documents" is great for end-users by teaching them to isolate
-their code and data, I personally loathe the fact that Vista/Win8 use the UAC to enforce placing files 
+But command lines in Windows are obtuse.
+DOS directory navigation and using command lines with no CTRL+C/CTRL+V cut/paste either scare or
+frustrate nearly everybody who uses them.  Hell, as a programmer using command lines in any environment 
+which allows spaces based tab command completion makes me feel dirty all over. 
+The programmer side of me appreciates why "My Documents" is great to teach end-users to isolate
+their code (applications) and data, but I loathe the fact that Vista/Win8 use the UAC to enforce placing files 
 in the oddest freaking locations which ALWAYS seem to include spaces.  As a Linux admin fluent in command
-line I find this alien landscape frightening. The goal of this is to bring the power of Node.js to end users
-running Win7/8/Vista and teach more web-developers to use Git.  (Both things I consider to be noble causes)
+line I find this alien landscape frightening, even though I know DOS very well.  The great 8.3 compromise of
+Win95 never quite sat well with me.  So the goal of this app is to bring the power of Node.js to end users
+running Win7/8/Vista and teach more web-developers to use Git.  (Both things I consider to be noble causes) by
+eliminating the DOS command line that seems to be the barrier to adoption. 
 
 LONG TERM GOALS
 ===

@@ -186,6 +186,12 @@ namespace NodeProxy
                 txtNodeLog.Text += "No Node.js == You're going to have a bad time (please download and install it)\n";
             }
 
+            // fakeRoot.Key is hardcoded.
+            CertKeyFileName = appPath + @"\openssl\\FakeRoot.key";
+            if (File.Exists(CertKeyFileName) == false) 
+            {
+                txtNodeLog.Text += "Missing " + CertKeyFileName + " can't create SSL certificates\n";
+            }
 
             if (AutoEnableStr == "1")
             {
@@ -465,8 +471,7 @@ namespace NodeProxy
             //string DomainCertFile;
 
             ProjectDir = "./demo";
-            CertKeyFileName = "./openssl/FakeRoot.key";
-            PemFileName = "./www.domain.com.crt";
+            PemFileName = "** PEM FILENAME NOT SET **";
 
             // node.exe installation directory can not be blank, checks before continuing         
             if (NodeInstallDir.Length == 0)
@@ -538,7 +543,6 @@ namespace NodeProxy
                 //strCmdText += " & cd " + appPath;
                 // hard code appPath because several directories 
                 // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
-                CertKeyFileName = PemFileName;
 
                 //CertKeyFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\FakeRoot.key";
                 //PemFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
@@ -547,7 +551,7 @@ namespace NodeProxy
                 strCmdText += " & node.exe javascript/nodeproxy.js ";
                 strCmdText += "--domain=" + DomainName;
                 strCmdText += " --rootdir=" + ProjectDir;
-                strCmdText += " --key=" + CertKeyFileName ;
+                strCmdText += " --key=" + PemFileName ;
                 strCmdText += " --cert=" + PemFileName ;
                 Console.WriteLine(strCmdText);
 
@@ -808,11 +812,12 @@ namespace NodeProxy
             bool DomainFieldsSucess = true;
 
             ProjectDir = "";
-            CertKeyFileName = "";
             PemFileName = "";
+
 
             if (DomainsHash.ContainsKey(DomainName) == true)
             {
+               
                 string DKey;
                 DKey = DomainsHash[DomainName].ToString();
                 if (DKey.Length > 0)

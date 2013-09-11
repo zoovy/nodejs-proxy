@@ -951,12 +951,15 @@ namespace NodeProxy
             RegistryKey registry = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", true);
             //registry.SetValue("ProxyEnable", 1);
             //registry.SetValue("ProxyServer", "127.0.0.1:8080");
-            OrigProxyEnable = registry.GetValue(ProxyEnable).ToString();
-            if (registry.GetValue(ProxyServer) != null)
+            if (registry != null)
             {
-            OrigProxyServer = registry.GetValue(ProxyServer).ToString();
+                OrigProxyEnable = registry.GetValue(ProxyEnable).ToString();
+                if (registry.GetValue(ProxyServer) != null)
+                {
+                    OrigProxyServer = registry.GetValue(ProxyServer).ToString();
+                }
+                registry.Close();
             }
-            registry.Close(); 
         }
 
 

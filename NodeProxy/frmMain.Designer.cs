@@ -228,7 +228,7 @@
             this.lblProxyAddr.Name = "lblProxyAddr";
             this.lblProxyAddr.Size = new System.Drawing.Size(79, 13);
             this.lblProxyAddr.TabIndex = 15;
-            this.lblProxyAddr.Text = "127.0.0.1:8081";
+            this.lblProxyAddr.Text = "127.0.0.1:8080";
             // 
             // label6
             // 

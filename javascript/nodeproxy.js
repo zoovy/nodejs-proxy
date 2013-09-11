@@ -107,7 +107,7 @@ util.puts(welcome.rainbow.bold);
 
 // console.log("\n");
 console.log("INTERCEPT DOMAIN => "+TESTING_DOMAIN);
-console.log("HTTP/HTTPS Proxy => 127.0.0.1:8081");
+console.log("HTTP/HTTPS Proxy => 127.0.0.1:8080");
 console.log("FILES SERVED FROM=> "+PROJECT_DIRECTORY);
 
  var WEBSERVERoptions = {
@@ -184,7 +184,7 @@ httpProxy.createServer(localWebserverPort, 'localhost', FAKEHOST_HTTPS_PROXY_opt
 
 
 //
-// Create a standalone HTTP/HTTPS proxy server that will receive connections from port 8081
+// Create a standalone HTTP/HTTPS proxy server that will receive connections from port 8080
 //
 // https proxy
 //
@@ -299,8 +299,8 @@ proxyWebServer.on('connect', function(req, socket, head) {
 		conn.pipe(socket);
 	});
 });
-// proxyWebServer will accept connections on port 8081
-proxyWebServer.listen(8081);
+// proxyWebServer will accept connections on port 8080
+proxyWebServer.listen(8080);
 console.log("Ready to work\n .. use ctrl+C to exit\n");
 
 // CREDITS

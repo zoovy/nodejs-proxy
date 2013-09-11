@@ -168,9 +168,12 @@ namespace NodeProxy
 
             if ((NodeProxyAddress == null) || (NodeProxyAddress.Length == 0)) {
                 // a reasonable guess for the proxy server
-                NodeProxyAddress = "127.0.0.1:8081";
+                NodeProxyAddress = "127.0.0.1:8080";
                 txtNodeLog.Text += "Auto-guess Proxy server: " + NodeProxyAddress + "\n";
             }
+
+            IPAddress test = IPAddress.Loopback;
+            txtNodeLog.Text += "Loopback: " + test.ToString() + "\n";
 
 
             if ((NodeInstallDir == null) || (NodeInstallDir.Length == 0))
@@ -211,7 +214,7 @@ namespace NodeProxy
             lblNodePath.Text = NodeInstallDir;
             lblProxyAddr.Text = NodeProxyAddress;
             // for testing
-            //lblProxyAddr.Text = "127.0.0.1:8081";
+            //lblProxyAddr.Text = "127.0.0.1:8080";
 
             // add the domains into list by splitting the string using comma as delimeter
             // used for loading the domains into the grid on the form and adding to menu in the system tray
@@ -516,15 +519,24 @@ namespace NodeProxy
                 // hard code appPath because several directories 
                 // ie appPath - "C:\\Users\\Becky\\Documents\\zoovy\\NodeProxy\\NodeProxy\\bin\\x86\\Debug"
                 // when we need this for testing
-                appPathLoc = @"C:\Users\Becky\Documents\zoovy\NodeProxy";
-
 
                 // run shell commands from C#
                 string strCmdText;
                 strCmdText = " /A /K ";
-                strCmdText += " echo Hello";
-                strCmdText += " & cd " + NodeInstallDir;
-                strCmdText += " & nodevars.bat";
+                strCmdText += " \" "; // beginning "
+                strCmdText += " cd " + NodeInstallDir;
+                if (File.Exists(NodeInstallDir + "\\nodevars.bat"))
+                {
+                    strCmdText += " & nodevars.bat";
+                }
+                else if (File.Exists(NodeInstallDir + "\\nodejsvars.bat"))
+                {
+                    strCmdText += " & nodejsvars.bat";
+                }
+                else
+                {
+                    txtNodeLog.Text += "ERROR: Could not fine nodevars.bat or nodejsvars.bat\n";
+                }
                 // strCmdText += "rem Ensure this Node.js and NPM are first in the PATH
                 //strCmdText += "set PATH=%APPDATA%\npm;%~dp0;%PATH%";
 
@@ -551,12 +563,25 @@ namespace NodeProxy
                 //CertKeyFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\FakeRoot.key";
                 //PemFileName = @"C:\Users\Becky\Documents\zoovy\newdomain\www.domain.com.crt";
                 // when we are using appPathLoc for testing
-                strCmdText += " & cd " + appPathLoc;
-                strCmdText += " & node.exe javascript/nodeproxy.js ";
+                // strCmdText += " & cd " + appPath;
+
+                if (!Directory.Exists(ProjectDir))
+                {
+                    txtNodeLog.Text = "ERROR: Project " + ProjectDir + " is invalid\n";
+                }
+
+                if (!File.Exists(PemFileName))
+                {
+                    txtNodeLog.Text = "ERROR: PEM File " + PemFileName + " does not exist\n";
+                }
+
+                strCmdText += " & node.exe "+appPath+"\\javascript\\nodeproxy.js ";
                 strCmdText += "--domain=" + DomainName;
                 strCmdText += " --rootdir=" + ProjectDir;
                 strCmdText += " --key=" + PemFileName ;
                 strCmdText += " --cert=" + PemFileName ;
+                // strCmdText += " --proxy=" + ProxyServer;
+                strCmdText += " \" ";   // terminating "
                 Console.WriteLine(strCmdText);
                 txtNodeLog.Text += strCmdText + "\n";
 
@@ -565,11 +590,11 @@ namespace NodeProxy
                 CMDprocess = new System.Diagnostics.Process();
 
                 startInfo = new System.Diagnostics.ProcessStartInfo();
-                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
-                //startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
+                // startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Normal;
                 //startInfo.RedirectStandardInput = true;
-                startInfo.RedirectStandardOutput = true;
-                startInfo.RedirectStandardError = true;
+                // startInfo.RedirectStandardOutput = true;
+                // startInfo.RedirectStandardError = true;
                 startInfo.UseShellExecute = false; //required to redirect
                 startInfo.FileName = "CMD.exe";
                 startInfo.Arguments = strCmdText;
@@ -577,11 +602,11 @@ namespace NodeProxy
                 CMDprocess.StartInfo = startInfo;
 
 
-                CMDprocess.OutputDataReceived += new DataReceivedEventHandler(OnOutputDataReceived);
-                CMDprocess.Exited += new EventHandler(OnCmdExited);
+                // CMDprocess.OutputDataReceived += new DataReceivedEventHandler(OnOutputDataReceived);
+                // CMDprocess.Exited += new EventHandler(OnCmdExited);
 
                 CMDprocess.Start();
-                CMDprocess.BeginOutputReadLine();
+                // CMDprocess.BeginOutputReadLine();
                 CMDprocess.WaitForExit();
 
                 //while (!processDone)

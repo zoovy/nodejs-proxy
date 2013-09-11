@@ -193,9 +193,10 @@ namespace NodeProxy
             }
 
             // fakeRoot.Key is hardcoded.
-            CertKeyFileName = appPath + @"\openssl\\FakeRoot.key";
-            if (File.Exists(CertKeyFileName) == false) 
+            CertKeyFileName = appPath + "\\openssl\\FakeRoot.key";
+            if (! File.Exists(CertKeyFileName)) 
             {
+                Console.WriteLine(CertKeyFileName);
                 txtNodeLog.Text += "Missing " + CertKeyFileName + " can't create SSL certificates\n";
             }
 
@@ -850,7 +851,7 @@ namespace NodeProxy
             }
 
             if (ErrorMsg == "") {
-               if (File.Exists(CertKeyFileName) == true) {
+               if (File.Exists(CertKeyFileName) == false) {
                    ErrorMsg = "Missing "+CertKeyFileName;
                }
             }
@@ -861,7 +862,11 @@ namespace NodeProxy
                 // grabs the variables - projectdir, key, cert from ini file
                 ProjectDir = ProxyIni.Configs[DKey].Get(ProjectDirKey);
                 PemFileName = ProjectDir + @"\" + DomainName + ".pem";
-                if ((Directory.Exists(ProjectDir) == false))
+                if (ProjectDir == "")
+                {
+                    ErrorMsg = "Please specify a valid Project Directory";
+                }
+                else if ((Directory.Exists(ProjectDir) == false))
                 {
                    ErrorMsg = "ProjectDir "+ProjectDir+" does not exist";
                 }

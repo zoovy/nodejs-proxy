@@ -106,7 +106,7 @@ namespace NodeProxy
 
             //AppDataDir = @"C:\Users\Becky\Documents";
 
-            DefaulProxySetting();
+            LoadSystemProxySetting();
 
             Use_Notify(); // Setting up all Property of Notifyicon 
 
@@ -944,7 +944,7 @@ namespace NodeProxy
             ProxyIni.Save();
         }
 
-        private void DefaulProxySetting()
+        private void LoadSystemProxySetting()
         {
             OrigProxyEnable = "";
             OrigProxyServer = "";
